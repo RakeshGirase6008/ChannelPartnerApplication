@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/ChannelPartnerApplication/v16/.suo
+/ChannelPartnerApplication/obj
+/ChannelPartnerApplication/bin/Debug/netcoreapp3.1
+/.vs/ChannelPartnerApplication/config
