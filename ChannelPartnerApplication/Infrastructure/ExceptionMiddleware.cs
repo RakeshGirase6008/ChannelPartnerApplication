@@ -1,6 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ChannelPartnerApplication.DataContext;
+using ChannelPartnerApplication.Models.ResponseModel;
+using ChannelPartnerApplication.Service;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
+using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace ChannelPartnerApplication.Infrastructure

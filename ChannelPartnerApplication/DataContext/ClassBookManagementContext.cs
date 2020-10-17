@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChannelPartnerApplication.Domain.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChannelPartnerApplication.DataContext
 {
@@ -8,6 +9,13 @@ namespace ChannelPartnerApplication.DataContext
             : base(options)
         {
         }
+
+        #region Common
+        public DbSet<Logs> Logs { get; set; }
+
+        public DbSet<Users> Users { get; set; }
+
+        #endregion
 
         #region OnModelCreating
 

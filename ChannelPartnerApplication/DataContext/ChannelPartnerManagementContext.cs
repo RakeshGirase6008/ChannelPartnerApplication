@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChannelPartnerApplication.Domain.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChannelPartnerApplication.DataContext
 {
     public class ChannelPartnerManagementContext : DbContext
     {
-        public ChannelPartnerManagementContext(DbContextOptions<ClassBookManagementContext> options)
+        public ChannelPartnerManagementContext(DbContextOptions<ChannelPartnerManagementContext> options)
             : base(options)
         {
         }
@@ -18,6 +19,12 @@ namespace ChannelPartnerApplication.DataContext
         //public DbSet<CareerExpert> CareerExpert { get; set; }
         //public DbSet<School> School { get; set; }
         //public DbSet<ChannelPartner> ChannelPartner { get; set; }
+
+        #endregion
+
+        #region Common
+
+        public DbSet<Settings> Settings { get; set; }
 
         #endregion
 

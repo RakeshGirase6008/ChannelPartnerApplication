@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Collections.Generic;
+﻿using ChannelPartnerApplication.DataContext;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace ChannelPartnerApplication.ActionFilter
 {
@@ -10,14 +11,17 @@ namespace ChannelPartnerApplication.ActionFilter
     {
         #region Fields
 
-        private readonly ClassBookManagementContext _context;
+        private readonly ChannelPartnerManagementContext _context;
+        private readonly ClassBookManagementContext _classcontext;
 
         #endregion
 
         #region Ctor
-        public ControllerFilterExample(ClassBookManagementContext context)
+        public ControllerFilterExample(ChannelPartnerManagementContext context,
+            ClassBookManagementContext classcontext)
         {
             this._context = context;
+            this._classcontext = classcontext;
         }
 
         #endregion
@@ -50,7 +54,7 @@ namespace ChannelPartnerApplication.ActionFilter
             var mySringauthorizationToken = authorizationToken.ToString();
             if (mySringauthorizationToken != "Default")
             {
-                var authorizationTokenKey = _context.Users.Where(x => x.AuthorizeTokenKey == mySringauthorizationToken).AsNoTracking();
+                var authorizationTokenKey = _classcontext.Users.Where(x => x.AuthorizeTokenKey == mySringauthorizationToken).AsNoTracking();
                 if (!authorizationTokenKey.Any() || status1 == false)
                 {
                     var validationError = new

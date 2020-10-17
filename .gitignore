@@ -6,3 +6,5 @@
 /ChannelPartnerApplication/obj
 /ChannelPartnerApplication/bin/Debug/netcoreapp3.1
 /.vs/ChannelPartnerApplication/config
+/.vs/ChannelPartnerApplication/DesignTimeBuild/.dtbcache.v2
+/ChannelPartnerApplication/ChannelPartnerApplication.csproj.user

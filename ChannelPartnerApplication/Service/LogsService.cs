@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ChannelPartnerApplication.DataContext;
+using ChannelPartnerApplication.Domain.Common;
+using System;
 
 namespace ChannelPartnerApplication.Service
 {
@@ -6,13 +8,13 @@ namespace ChannelPartnerApplication.Service
     {
         #region Fields
 
-        private readonly ClassBookLogsContext _context;
+        private readonly ClassBookManagementContext _context;
 
 
         #endregion
 
         #region Ctor
-        public LogsService(ClassBookLogsContext context)
+        public LogsService(ClassBookManagementContext context)
         {
             this._context = context;
         }
