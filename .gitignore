@@ -8,3 +8,6 @@
 /.vs/ChannelPartnerApplication/config
 /.vs/ChannelPartnerApplication/DesignTimeBuild/.dtbcache.v2
 /ChannelPartnerApplication/ChannelPartnerApplication.csproj.user
+/ChannelPartnerApplication/bin/Release/netcoreapp3.1/Properties
+/ChannelPartnerApplication/bin/Release/netcoreapp3.1/runtimes
+/ChannelPartnerApplication/bin/Release/netcoreapp3.1
