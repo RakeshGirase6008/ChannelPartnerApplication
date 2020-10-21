@@ -1,8 +1,13 @@
-﻿using ChannelPartnerApplication.Factory;
+﻿using ChannelPartnerApplication.DataContext;
+using ChannelPartnerApplication.Domain.ChannelPartner;
+using ChannelPartnerApplication.Domain.Common;
+using ChannelPartnerApplication.Factory;
+using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -19,6 +24,8 @@ namespace ChannelPartnerApplication.Service
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ChannelPartnerModelFactory _channelPartnerModelFactory;
+        private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
+        
 
         #endregion
 
@@ -29,13 +36,15 @@ namespace ChannelPartnerApplication.Service
             IConfiguration configuration,
             IWebHostEnvironment env,
             IHttpContextAccessor httpContextAccessor,
-            ChannelPartnerModelFactory channelPartnerModelFactory)
+            ChannelPartnerModelFactory channelPartnerModelFactory,
+            ChannelPartnerManagementContext channelPartnerManagementContext)
         {
             this._fileService = fileService;
             this._configuration = configuration;
             this._env = env;
             this._httpContextAccessor = httpContextAccessor;
             this._channelPartnerModelFactory = channelPartnerModelFactory;
+            this._channelPartnerManagementContext = channelPartnerManagementContext;
         }
 
         #endregion
@@ -230,27 +239,130 @@ namespace ChannelPartnerApplication.Service
         ///// <summary>
         ///// SaveUserData
         ///// </summary>
-        //public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId, string deviceId)
-        //{
-        //    var password = GeneratePassword(true, true, true, false, false, 16);
-        //    Users user = new Users();
-        //    user.EntityId = userId;
-        //    user.ModuleId = (int)module;
-        //    user.UserName = userName;
-        //    user.Email = email;
-        //    user.Password = password;
-        //    user.AuthorizeTokenKey = GenerateAuthorizeTokenKey();
-        //    user.CreatedDate = DateTime.Now;
-        //    user.Active = true;
-        //    user.Deleted = false;
-        //    user.FCMId = FCMId;
-        //    _context.Users.Add(user);
-        //    _context.SaveChanges();
-        //    SaveDeviceAuthorizationData(user, deviceId);
-        //    return user;
-        //}
+        public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId, string deviceId)
+        {
+            var password = GeneratePassword(true, true, true, false, false, 16);
+            Users user = new Users();
+            user.EntityId = userId;
+            user.ModuleId = (int)module;
+            user.UserName = userName;
+            user.Email = email;
+            user.Password = password;
+            user.AuthorizeTokenKey = GenerateAuthorizeTokenKey();
+            user.CreatedDate = DateTime.Now;
+            user.Active = true;
+            user.Deleted = false;
+            user.FCMId = FCMId;
+            _channelPartnerManagementContext.Users.Add(user);
+            _channelPartnerManagementContext.SaveChanges();
+            //SaveDeviceAuthorizationData(user, deviceId);
+            return user;
+        }
 
 
         #endregion
+
+        #region ChannelPartner
+
+        /// <summary>
+        /// Save the ChannelPartner Record
+        /// </summary>
+        public (int ChannelPartnerId, string UniqueNo) SaveChannelPartner(ChannelPartner ChannelPartnerData, List<IFormFile> files)
+        {
+            ChannelPartner ChannelPartner = new ChannelPartner();
+            ChannelPartner.FirstName = ChannelPartnerData.FirstName;
+            ChannelPartner.LastName = ChannelPartnerData.LastName;
+            ChannelPartner.Email = ChannelPartnerData.Email;
+            ChannelPartner.ContactNo = ChannelPartnerData.ContactNo;
+            ChannelPartner.AlternateContact = ChannelPartnerData.AlternateContact;
+            ChannelPartner.Gender = ChannelPartnerData.Gender;
+            if (files?.Count > 0)
+                ChannelPartner.ProfilePictureUrl = _fileService.SaveFile(files, ChannelPartnerConstant.ImagePath_ChannelPartner);
+            ChannelPartner.DOB = ChannelPartnerData.DOB;
+            ChannelPartner.Address = ChannelPartnerData.Address;
+            ChannelPartner.StateId = ChannelPartnerData.StateId;
+            ChannelPartner.CityId = ChannelPartnerData.StateId;
+            ChannelPartner.Pincode = ChannelPartnerData.Pincode;
+            ChannelPartner.ApproveStatus = ChannelPartnerData.ApproveStatus;
+            ChannelPartner.ApprovalDate = ChannelPartnerData.ApprovalDate;
+            ChannelPartner.TeachingExperience = ChannelPartnerData.TeachingExperience;
+            ChannelPartner.Description = ChannelPartnerData.Description;
+            ChannelPartner.ReferCode = GenerateReferecode();
+            var previousUnique = _channelPartnerManagementContext.ChannelPartner.OrderByDescending(x => x.Id).Select(x => x.UniqueNo).FirstOrDefault();
+            ChannelPartner.UniqueNo = GenerateUniqueNo(previousUnique, ChannelPartnerData.FirstName, ChannelPartnerData.Email);
+            ChannelPartner.RegistrationFromTypeId = ChannelPartnerData.RegistrationFromTypeId;
+            ChannelPartner.RegistrationByTypeId = ChannelPartnerData.RegistrationByTypeId;
+            ChannelPartner.CreatedDate = DateTime.Now;
+            ChannelPartner.CreatedBy = 0;
+            ChannelPartner.Active = true;
+            ChannelPartner.Deleted = false;
+            _channelPartnerManagementContext.ChannelPartner.Add(ChannelPartner);
+            _channelPartnerManagementContext.SaveChanges();
+
+            // Save Channel Partner Mapping
+            ChannelPartnerMapping channelPartnerMapping = new ChannelPartnerMapping();
+            channelPartnerMapping.ChannelPartnerId = ChannelPartner.Id;
+            channelPartnerMapping.LevelId = 0;
+            channelPartnerMapping.CurrentCount = 0;
+            channelPartnerMapping.TotalCount = 0;
+            if (!string.IsNullOrEmpty(ChannelPartnerData.ReferCode))
+            {
+                var channelPartners = _channelPartnerManagementContext.ChannelPartner.Where(x => x.ReferCode == ChannelPartnerData.ReferCode);
+                if (channelPartners.Any())
+                    channelPartnerMapping.ParentId = channelPartners.FirstOrDefault().Id;
+                else
+                    channelPartnerMapping.ParentId = 0;
+            }
+            _channelPartnerManagementContext.ChannelPartnerMapping.Add(channelPartnerMapping);
+            _channelPartnerManagementContext.SaveChanges();
+
+            return (ChannelPartner.Id, ChannelPartner.UniqueNo);
+        }
+
+        private string GenerateReferecode()
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            var result = new string(
+                Enumerable.Repeat(chars, 8)
+                          .Select(s => s[random.Next(s.Length)])
+                          .ToArray());
+            return result;
+        }
+
+        /// <summary>
+        /// Update the ChannelPartner Record
+        /// </summary>
+        public int UpdateChannelPartner(ChannelPartner ChannelPartnerData, ChannelPartner ChannelPartner, List<IFormFile> files)
+        {
+            ChannelPartner.FirstName = ChannelPartnerData.FirstName;
+            ChannelPartner.LastName = ChannelPartnerData.LastName;
+            ChannelPartner.Email = ChannelPartnerData.Email;
+            ChannelPartner.ContactNo = ChannelPartnerData.ContactNo;
+            ChannelPartner.AlternateContact = ChannelPartnerData.AlternateContact;
+            ChannelPartner.Gender = ChannelPartnerData.Gender;
+            if (files?.Count > 0)
+            {
+                ChannelPartner.ProfilePictureUrl = _fileService.SaveFile(files, ChannelPartnerConstant.ImagePath_ChannelPartner);
+            }
+            ChannelPartner.DOB = ChannelPartnerData.DOB;
+            ChannelPartner.Address = ChannelPartnerData.Address;
+            ChannelPartner.StateId = ChannelPartnerData.StateId;
+            ChannelPartner.CityId = ChannelPartnerData.StateId;
+            ChannelPartner.Pincode = ChannelPartnerData.Pincode;
+            ChannelPartner.ApproveStatus = ChannelPartnerData.ApproveStatus;
+            ChannelPartner.ApprovalDate = ChannelPartnerData.ApprovalDate;
+            ChannelPartner.TeachingExperience = ChannelPartnerData.TeachingExperience;
+            ChannelPartner.Description = ChannelPartnerData.Description;
+            ChannelPartner.ReferCode = ChannelPartnerData.ReferCode;
+            ChannelPartner.UpdatedDate = DateTime.Now;
+            ChannelPartner.UpdatedBy = 0;
+            _channelPartnerManagementContext.ChannelPartner.Update(ChannelPartner);
+            _channelPartnerManagementContext.SaveChanges();
+            return ChannelPartner.Id;
+        }
+
+        #endregion
     }
+
 }

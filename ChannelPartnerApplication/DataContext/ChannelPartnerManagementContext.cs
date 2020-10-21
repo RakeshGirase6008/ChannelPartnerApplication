@@ -1,4 +1,5 @@
-﻿using ChannelPartnerApplication.Domain.Common;
+﻿using ChannelPartnerApplication.Domain.ChannelPartner;
+using ChannelPartnerApplication.Domain.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChannelPartnerApplication.DataContext
@@ -18,13 +19,16 @@ namespace ChannelPartnerApplication.DataContext
         //public DbSet<Teacher> Teacher { get; set; }
         //public DbSet<CareerExpert> CareerExpert { get; set; }
         //public DbSet<School> School { get; set; }
-        //public DbSet<ChannelPartner> ChannelPartner { get; set; }
+        public DbSet<ChannelPartner> ChannelPartner { get; set; }
+        public DbSet<ChannelPartnerMapping> ChannelPartnerMapping { get; set; }
 
         #endregion
 
         #region Common
 
         public DbSet<Settings> Settings { get; set; }
+        public DbSet<Users> Users { get; set; }
+        public DbSet<Logs> Logs { get; set; }
 
         #endregion
 

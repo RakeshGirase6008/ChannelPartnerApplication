@@ -788,9 +788,6 @@ BEGIN
 
 		SET @ChannelPartnerId=@ParentId
 	END
-	SELECT * FROM ChannelPartnerMapping
-	SELECT * FROM CommissionHistory ORDER by Id Desc
-	SELECT * FROM PromotionHistory ORDER by Id Desc
 END
 
 GO

@@ -16,13 +16,14 @@ namespace ChannelPartnerApplication.Infrastructure
     {
         private readonly RequestDelegate _next;
         private readonly LogsService _logsService;
-        private readonly ClassBookManagementContext _context;
+        private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
+
         public ExceptionMiddleware(RequestDelegate next, LogsService logsService,
-            ClassBookManagementContext context)
+            ChannelPartnerManagementContext channelPartnerManagementContext)
         {
             _next = next;
             _logsService = logsService;
-            _context = context;
+            _channelPartnerManagementContext = channelPartnerManagementContext;
         }
         public async Task InvokeAsync(HttpContext httpContext)
         {
@@ -40,7 +41,7 @@ namespace ChannelPartnerApplication.Infrastructure
                     StringValues secretKeyToken;
                     httpContext.Request.Headers.TryGetValue("AuthorizeTokenKey", out secretKeyToken).ToString();
                     var authorizationTokenKey = secretKeyToken.ToString();
-                    var singleUser = _context.Users.Where(x => x.AuthorizeTokenKey == authorizationTokenKey).AsNoTracking();
+                    var singleUser = _channelPartnerManagementContext.Users.Where(x => x.AuthorizeTokenKey == authorizationTokenKey).AsNoTracking();
                     if (singleUser.Any())
                     {
                         userId = singleUser.FirstOrDefault().Id;

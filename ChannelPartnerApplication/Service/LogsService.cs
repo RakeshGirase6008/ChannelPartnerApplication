@@ -8,15 +8,15 @@ namespace ChannelPartnerApplication.Service
     {
         #region Fields
 
-        private readonly ClassBookManagementContext _context;
+        private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
 
 
         #endregion
 
         #region Ctor
-        public LogsService(ClassBookManagementContext context)
+        public LogsService(ChannelPartnerManagementContext channelPartnerManagementContext)
         {
-            this._context = context;
+            this._channelPartnerManagementContext = channelPartnerManagementContext;
         }
 
         #endregion
@@ -35,8 +35,8 @@ namespace ChannelPartnerApplication.Service
             logs.APIName = APIName;
             logs.UserId = userId;
             logs.CreatedOnDate = DateTime.Now;
-            _context.Logs.Add(logs);
-            _context.SaveChanges();
+            _channelPartnerManagementContext.Logs.Add(logs);
+            _channelPartnerManagementContext.SaveChanges();
         }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace ChannelPartnerApplication.Service
             logs.APIName = APIName;
             logs.UserId = userId;
             logs.CreatedOnDate = DateTime.Now;
-            _context.Logs.Add(logs);
-            _context.SaveChanges();
+            _channelPartnerManagementContext.Logs.Add(logs);
+            _channelPartnerManagementContext.SaveChanges();
         }
 
 
