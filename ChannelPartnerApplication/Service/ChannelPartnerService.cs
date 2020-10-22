@@ -2,10 +2,12 @@
 using ChannelPartnerApplication.Domain.ChannelPartner;
 using ChannelPartnerApplication.Domain.Common;
 using ChannelPartnerApplication.Factory;
+using ChannelPartnerApplication.Models.RequestModels;
 using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,7 +27,7 @@ namespace ChannelPartnerApplication.Service
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ChannelPartnerModelFactory _channelPartnerModelFactory;
         private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
-        
+
 
         #endregion
 
@@ -363,6 +365,24 @@ namespace ChannelPartnerApplication.Service
         }
 
         #endregion
-    }
 
+
+        #region SendRegister
+
+        public IRestResponse RegisterMethod(CommonRegistrationModel model, string ApiName)
+        {
+            var client = new RestClient(ChannelPartnerConstant.ClassbookWebSite_HostURL.ToString() + ApiName.ToString());
+            client.Timeout = -1;
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Secret_Key", _httpContextAccessor.HttpContext.Request.Headers["Secret_Key"]);
+            request.AddHeader("AuthorizeTokenKey", _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"]);
+            //request.AddFile("file", model.File.FileName, model.File.ContentType);
+            request.AddParameter("data", model.Data);
+            request.AddParameter("DeviceId", model.DeviceId);
+            request.AddParameter("FCMId", model.FCMId);
+            IRestResponse response = client.Execute(request);
+            return response;
+        }
+        #endregion
+    }
 }

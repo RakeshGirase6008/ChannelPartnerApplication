@@ -1,6 +1,6 @@
 ﻿using ChannelPartnerApplication.Models.RequestModels;
+using ChannelPartnerApplication.Service;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using RestSharp;
 
 namespace ChannelPartnerApplication.Controllers.API
@@ -10,13 +10,15 @@ namespace ChannelPartnerApplication.Controllers.API
     {
         #region Fields
 
+        private readonly ChannelPartnerService _channelPartnerService;
 
         #endregion
 
         #region Ctor
 
-        public RegistrationController()
+        public RegistrationController(ChannelPartnerService channelPartnerService)
         {
+            this._channelPartnerService = channelPartnerService;
         }
 
         #endregion
@@ -24,21 +26,44 @@ namespace ChannelPartnerApplication.Controllers.API
         #region Register User
 
         // POST api/Registration/StudentRegister
-        [HttpPost("Register")]
-        public string StudentRegister([FromForm] CommonRegistrationModel model)
+        [HttpPost("StudentRegister")]
+        public ActionResult StudentRegister([FromForm] CommonRegistrationModel model)
         {
-            var client = new RestClient("http://localhost:57299/api/v1/student/register");
-            client.Timeout = -1;
-            //var json = JsonConvert.SerializeObject(model.Data);
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Secret_Key", "ClassBook-y18PJltrUUfTYFfgvUpNkIs7YBLfHRA1");
-            request.AddHeader("AuthorizeTokenKey", "Default");
-            //request.AddFile("file", model.File.FileName, model.File.ContentType);
-            request.AddParameter("data", model.Data.ToString());
-            request.AddParameter("DeviceId", model.DeviceId);
-            request.AddParameter("FCMId", model.FCMId);
-            IRestResponse response = client.Execute(request);
-            return response.Content;
+            IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/student/register");
+            return StatusCode((int)response.StatusCode, response.Content);
+        }
+
+        // POST api/Registration/TeacherRegister
+        [HttpPost("TeacherRegister")]
+        public ActionResult TeacherRegister([FromForm] CommonRegistrationModel model)
+        {
+            IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/teacher/register");
+            return StatusCode((int)response.StatusCode, response.Content);
+        }
+
+        // POST api/Registration/ClassRegister
+        [HttpPost("ClassesRegister")]
+        public ActionResult ClassesRegister([FromForm] CommonRegistrationModel model)
+        {
+            IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/classes/register");
+            return StatusCode((int)response.StatusCode, response.Content);
+        }
+
+        // POST api/Registration/SchoolRegister
+        [HttpPost("SchoolRegister")]
+        public ActionResult SchoolRegister([FromForm] CommonRegistrationModel model)
+        {
+            IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/school/register");
+            return StatusCode((int)response.StatusCode, response.Content);
+        }
+
+
+        // POST api/Registration/CareerExpertRegister
+        [HttpPost("CareerExpertRegister")]
+        public ActionResult CareerExpertRegister([FromForm] CommonRegistrationModel model)
+        {
+            IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/CareerExpert/register");
+            return StatusCode((int)response.StatusCode, response.Content);
         }
 
         #endregion

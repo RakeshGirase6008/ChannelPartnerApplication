@@ -17,7 +17,7 @@ namespace ChannelPartnerApplication.Factory
         public string PrepareURL(string ImageUrl)
         {
             if (!string.IsNullOrEmpty(ImageUrl))
-                return ChannelPartnerConstant.WebSite_HostURL.ToString() + "/" + ImageUrl.Replace("\\", "/");
+                return ChannelPartnerConstant.ClassbookWebSite_HostURL.ToString() + "/" + ImageUrl.Replace("\\", "/");
             return string.Empty;
         }
     }

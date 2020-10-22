@@ -4,7 +4,8 @@
     {
         #region Common Constant
 
-        public const string WebSite_HostURL = "https://classbookapplication.appspot.com";
+        public const string ClassbookWebSite_HostURL = "http://localhost:57299";
+        //public const string ClassbookWebSite_HostURL = "https://classbookapplication.appspot.com";
 
         #endregion
 
