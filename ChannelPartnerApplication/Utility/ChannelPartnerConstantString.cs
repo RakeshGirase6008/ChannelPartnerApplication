@@ -14,5 +14,12 @@
         public const string Validation_MobileExist = "Mobile Number is already exist for other user";
 
         #endregion
+
+        #region Login Message
+
+        public const string Login_Success = "Login_Success";
+        public const string Login_Failed = "Login_Failed";
+
+        #endregion
     }
 }

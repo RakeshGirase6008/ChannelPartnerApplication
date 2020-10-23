@@ -1,17 +1,18 @@
 CREATE PROCEDURE [Classbook_CalculateCommision]
 	@OrderId INT,
-	@ChannelPartnerId INT
+	@ChannelPartnerId INT,
+	@OurAmount DECIMAL,
+	@From VARCHAR(50)
 AS
 BEGIN
 
 	DECLARE @ResidualPercentageAchieve DECIMAL=4
-	DECLARE @ResidualPercentageNotAchieve DECIMAL=2
+	DECLARE @ResidualPercentageNotAchieve DECIMAL(10,2)=2.5
 	DECLARE @DefaultPercentage INT=10
 	DECLARE @LevelId INT=0
 
 	DECLARE @LevelDifferntPercentage INT=0
 	DECLARE @TotalSpendLevelDifferntPercentage INT=0
-	DECLARE @OurAmount DECIMAL=0
 	DECLARE @PartnerAmount DECIMAL=0
 	DECLARE @ParentId INT=-1
 	DECLARE @CurrentCount INT
@@ -25,7 +26,6 @@ BEGIN
 	DECLARE @TargetToReach INT=0
 
 	DECLARE @StartResidualChannerlPartnerId INT=0
-	SELECT @OurAmount=OurAmount FROM [Order] WHERE Id=@OrderId
 
 	WHILE (@ParentId!=0)
 	BEGIN
@@ -49,7 +49,7 @@ BEGIN
 			BEGIN
 				
 				SET @PartnerAmount=(@OurAmount*@LevelDifferntPercentage)/100;
-				INSERT INTO CommissionHistory VALUES(@OrderId,@ChannelPartnerId,@LevelId,@PartnerAmount,'Direct','LevelDiff')
+				INSERT INTO CommissionHistory VALUES(@OrderId,@From,@ChannelPartnerId,@LevelId,@PartnerAmount,'Direct','LevelDiff')
 				SET @TotalSpendLevelDifferntPercentage=@TotalSpendLevelDifferntPercentage+@LevelDifferntPercentage;
 			END
 			ELSE
@@ -59,7 +59,7 @@ BEGIN
 
 					SET @CalculativePercentage=@LevelDifferntPercentage-@PreviousChannelPartnerPercentage;
 					SET @PartnerAmount=(@OurAmount*@CalculativePercentage)/100;
-					INSERT INTO CommissionHistory VALUES(@OrderId,@ChannelPartnerId,@LevelId,@PartnerAmount,'InDirect','LevelDiff')
+					INSERT INTO CommissionHistory VALUES(@OrderId,@From,@ChannelPartnerId,@LevelId,@PartnerAmount,'InDirect','LevelDiff')
 					SET @TotalSpendLevelDifferntPercentage=@TotalSpendLevelDifferntPercentage+@CalculativePercentage;
 
 				END
@@ -84,7 +84,7 @@ BEGIN
 					SET @CalculativePercentage=@ResidualPercentageNotAchieve
 				END
 				SET @PartnerAmount=(@OurAmount*@CalculativePercentage)/100;
-				INSERT INTO CommissionHistory VALUES(@OrderId,@ChannelPartnerId,@LevelId,@PartnerAmount,'InDirect','Residual')
+				INSERT INTO CommissionHistory VALUES(@OrderId,@From,@ChannelPartnerId,@LevelId,@PartnerAmount,'InDirect','Residual')
 				SET @GenerationCount=@GenerationCount+1
 			END
 			ELSE
@@ -121,8 +121,8 @@ BEGIN
 	SELECT * FROM PromotionHistory ORDER by Id Desc
 END
 
-GO
 
+GO
 CREATE PROCEDURE [Classbook_CalculateCommision_MonthEnd]
 AS
 BEGIN

@@ -25,7 +25,6 @@ namespace ChannelPartnerApplication.Service
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly ChannelPartnerModelFactory _channelPartnerModelFactory;
         private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
 
 
@@ -38,14 +37,12 @@ namespace ChannelPartnerApplication.Service
             IConfiguration configuration,
             IWebHostEnvironment env,
             IHttpContextAccessor httpContextAccessor,
-            ChannelPartnerModelFactory channelPartnerModelFactory,
             ChannelPartnerManagementContext channelPartnerManagementContext)
         {
             this._fileService = fileService;
             this._configuration = configuration;
             this._env = env;
             this._httpContextAccessor = httpContextAccessor;
-            this._channelPartnerModelFactory = channelPartnerModelFactory;
             this._channelPartnerManagementContext = channelPartnerManagementContext;
         }
 
@@ -61,22 +58,6 @@ namespace ChannelPartnerApplication.Service
             return _configuration.GetConnectionString("ClassBookManagementeDatabase");
         }
 
-        ///// <summary>
-        ///// Save the Device Authorization Data
-        ///// </summary>
-        //public void SaveDeviceAuthorizationData(Users user, string DeviceId)
-        //{
-        //    if (!_context.AuthorizeDeviceData.Where(x => x.DeviceId == DeviceId && x.UserId == user.Id).AsNoTracking().Any())
-        //    {
-        //        var AuthorizeDeviceData = new AuthorizeDeviceData
-        //        {
-        //            UserId = user.Id,
-        //            DeviceId = DeviceId
-        //        };
-        //        _context.AuthorizeDeviceData.Add(AuthorizeDeviceData);
-        //        _context.SaveChanges();
-        //    }
-        //}
         /// <summary>
         /// Generate Random Token Key
         /// </summary>
@@ -380,6 +361,17 @@ namespace ChannelPartnerApplication.Service
             request.AddParameter("data", model.Data);
             request.AddParameter("DeviceId", model.DeviceId);
             request.AddParameter("FCMId", model.FCMId);
+            IRestResponse response = client.Execute(request);
+            return response;
+        }
+
+        public IRestResponse GetCommonFromClassBook(string ApiName)
+        {
+            var client = new RestClient(ChannelPartnerConstant.ClassbookWebSite_HostURL.ToString() + ApiName.ToString());
+            client.Timeout = -1;
+            var request = new RestRequest(Method.GET);
+            request.AddHeader("Secret_Key", _httpContextAccessor.HttpContext.Request.Headers["Secret_Key"]);
+            request.AddHeader("AuthorizeTokenKey", _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"]);
             IRestResponse response = client.Execute(request);
             return response;
         }
