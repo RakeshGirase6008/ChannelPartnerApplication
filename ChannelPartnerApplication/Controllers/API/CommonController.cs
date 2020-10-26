@@ -6,8 +6,8 @@ using ChannelPartnerApplication.Service;
 using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -46,42 +46,88 @@ namespace ChannelPartnerApplication.Controllers.API
 
         // GET api/Common/GetStates
         [HttpGet("GetStates")]
-        public string GetStates()
+        public IEnumerable<object> GetStates()
         {
-            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/common/getStates");
-            return response.Content;
+            var States = _context.States.Where(x => x.Active == true).Select(x => new { x.Name, x.Id });
+            return States;
         }
 
         // GET api/Common/GetCities
         [HttpGet("GetCities")]
-        public string GetCities()
+        public IEnumerable<object> GetCities()
         {
-            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetCities");
-            return response.Content;
+            var cities = _context.City.Where(x => x.Active == true).Select(x => new { x.Name, x.Id });
+            return cities;
         }
 
         // GET api/Common/GetCitiesByStateId/6
         [HttpGet("GetCitiesByStateId/{id:int}")]
-        public string GetCities(int id)
+        public IEnumerable<object> GetCities(int id)
         {
-            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("api/Common/GetCitiesByStateId/" + id);
-            return response.Content;
+            var cityData = from city in _context.City
+                           where city.StateId == id && city.Active == true
+                           select new { city.Name, city.Id };
+            return cityData;
         }
 
         // GET api/Common/GetPincodes
         [HttpGet("GetPincodes")]
-        public string GetPincodes()
+        public IEnumerable<object> GetPincodes()
         {
-            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetPincodes");
-            return response.Content;
+            var pincodes = _context.Pincode.Where(x => x.Active == true).Select(x => new { x.Name, x.Id });
+            return pincodes;
         }
 
         // GET api/Common/GetPincodeByCityId/6
         [HttpGet("GetPincodeByCityId/{id:int}")]
-        public string GetPincodeByCityId(int id)
+        public IEnumerable<object> GetPincodeByCityId(int id)
         {
-            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("api/Common/GetPincodeByCityId/" + id);
-            return response.Content;
+            var cityData = from pincode in _context.Pincode
+                           where pincode.CityId == id && pincode.Active == true
+                           select new { pincode.Name, pincode.Id };
+            return cityData;
+        }
+
+        // GET api/Common/GetGenerations
+        [HttpGet("GetGenerations")]
+        public IEnumerable<object> GetGenerations()
+        {
+            var levelIds = _context.PromotionalCycle.Where(x => x.Id > 1).Select(x =>
+                            new { x.LevelId, x.Id }).ToList();
+            List<CommonDropDownModel> levels = new List<CommonDropDownModel>();
+            foreach (var item in levelIds)
+            {
+                levels.Add(new CommonDropDownModel()
+                {
+                    Id = item.LevelId.ToString(),
+                    Name = _channelPartnerService.NumberToWords(item.LevelId)
+                });
+            }
+            return levels;
+        }
+
+        // GET api/Common/GetLevels
+        [HttpGet("GetLevels")]
+        public IEnumerable<object> GetLevels()
+        {
+            var levels = _context.PromotionalCycle.Where(x => x.Id > 1).Select(x => new { x.LevelId, x.Id });
+            return levels;
+        }
+
+
+        //// GET api/Common/GetStates
+        //[HttpGet("GetStates")]
+        //public string GetStates()
+        //{
+        //    IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/common/getStates");
+        //    return response.Content;
+        //}
+
+        // GET api/Common/GetLevelChartInformations
+        [HttpGet("GetLevelChartInformations")]
+        public IEnumerable<object> GetLevelChartInformations()
+        {
+            return _channelPartnerService.GetLevelChart();
         }
 
         #endregion
@@ -164,5 +210,6 @@ namespace ChannelPartnerApplication.Controllers.API
             }
         }
         #endregion
+
     }
 }

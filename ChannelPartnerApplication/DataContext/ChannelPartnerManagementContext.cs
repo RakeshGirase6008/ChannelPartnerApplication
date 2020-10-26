@@ -14,13 +14,12 @@ namespace ChannelPartnerApplication.DataContext
 
         #region ClassBookMain
 
-        //public DbSet<Student> Student { get; set; }
-        //public DbSet<Classes> Classes { get; set; }
-        //public DbSet<Teacher> Teacher { get; set; }
-        //public DbSet<CareerExpert> CareerExpert { get; set; }
-        //public DbSet<School> School { get; set; }
+        public DbSet<States> States { get; set; }
+        public DbSet<City> City { get; set; }
+        public DbSet<Pincode> Pincode { get; set; }
         public DbSet<ChannelPartner> ChannelPartner { get; set; }
         public DbSet<ChannelPartnerMapping> ChannelPartnerMapping { get; set; }
+        public DbSet<PromotionalCycle> PromotionalCycle { get; set; }
 
         #endregion
 

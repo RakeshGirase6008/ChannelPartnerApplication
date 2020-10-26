@@ -6,7 +6,6 @@
 
         public const string ClassbookWebSite_HostURL = "http://localhost:57299";
         //public const string ClassbookWebSite_HostURL = "https://classbookapplication.appspot.com";
-
         #endregion
 
         #region ImagePath
@@ -59,32 +58,9 @@
         #endregion
 
         #region StoredProcedure
-
-        public const string SP_ClassBook_GetModuleDataByModuleId = "ClassBook_GetModuleDataByModuleId";
-        public const string SP_ClassBook_GetCartDetailByUserId = "ClassBook_GetCartDetailByUserId";
-        public const string SP_ClassBook_GetSubscrptionDetailByUserId = "ClassBook_GetSubscrptionDetailByUserId";
-        public const string SP_ClassBook_GetTranscationDetailByUserId = "ClassBook_GetTranscationDetailByUserId";
-        public const string SP_ClassBook_GetDetailById = "ClassBook_GetDetailById";
-        public const string SP_ClassBook_GetSubjects = "ClassBook_GetSubjects";
-        public const string SP_ClassBook_GetCourses = "ClassBook_GetCourses";
-        public const string SP_ClassBook_OrderPaid = "ClassBook_OrderPaid";
-        public const string SP_ClassBook_GetFavourites = "ClassBook_GetFavourites";
-
+        public const string SP_ChannelPartner_GetLevelChart = "ChannelPartner_GetLevelChart";
+        public const string SP_ChannelPartner_GetChannelPartnersList = "ChannelPartner_GetChannelPartnersList";
         #endregion
 
-        #region TypeOfMapping
-
-        public const string Mapping_Subject = "Subject";
-        public const string Mapping_Course = "Course";
-        public const string Mapping_Expertise = "Expertise";
-
-        #endregion
-
-        #region TypeOfLearning
-
-        public const string LearningType_Distance = "Distance";
-        public const string LearningType_Physical = "Physical";
-
-        #endregion
     }
 }

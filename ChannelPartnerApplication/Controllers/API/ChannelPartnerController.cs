@@ -8,6 +8,7 @@ using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -113,44 +114,48 @@ namespace ChannelPartnerApplication.Controllers.API
 
         #region GetChannelPartnerDetails
 
-        //// GET api/ChannelPartner/GetChannelPartnerDetails
-        //[HttpGet("GetChannelPartnerDetails")]
-        //public IEnumerable<ListingModel> GetChannelPartnerDetails()
-        //{
-        //    return _classBookService.GetModuleDataByModuleId((int)Module.CareerExpert);
-        //}
+        // GET api/ChannelPartner/GetChannelPartnerDetails
+        [HttpPost("GetChannelPartnerDetails")]
+        public IEnumerable<ChannelPartnerListingModel> GetChannelPartnersList([FromForm] string searchKeyword, [FromForm] int levelId, [FromForm] int generationId)
+        {
+            return _channelPartnerService.GetChannelPartnerListing(1,searchKeyword,levelId,generationId) ;
+        }
 
         //// GET api/ChannelPartner/GetChannelPartnerById/5
-        //[HttpGet("GetChannelPartnerById/{id:int}")]
-        //public object GetChannelPartnerById(int id)
-        //{
-        //    var query = from careerExpert in _context.CareerExpert
-        //                join state in _context.States on careerExpert.StateId equals state.Id
-        //                join city in _context.City on careerExpert.CityId equals city.Id
-        //                join pincode in _context.Pincode on careerExpert.Pincode equals pincode.Id
-        //                where careerExpert.Id == id && careerExpert.Active == true
-        //                orderby careerExpert.Id
-        //                select new
-        //                {
-        //                    FirstName = careerExpert.FirstName,
-        //                    LastName = careerExpert.LastName,
-        //                    Address = careerExpert.Address,
-        //                    Email = careerExpert.Email,
-        //                    Gender = careerExpert.Gender,
-        //                    ImageUrl = careerExpert.ProfilePictureUrl,
-        //                    DOB = careerExpert.DOB,
-        //                    ContactNo = careerExpert.ContactNo,
-        //                    AlternateContact = careerExpert.AlternateContact,
-        //                    TeachingExperience = careerExpert.TeachingExperience,
-        //                    Description = careerExpert.Description,
-        //                    ReferCode = careerExpert.ReferCode,
-        //                    StateName = state.Name,
-        //                    CityName = city.Name,
-        //                    Pincode = pincode.Name,
-        //                };
-        //    var careerExpertData = query.FirstOrDefault();
-        //    return careerExpertData;
-        //}
+        [HttpGet("GetChannelPartnerById/{id:int}")]
+        public object GetChannelPartnerById(int id)
+        {
+            var query = from channelPartner in _channelPartnerManagementContext.ChannelPartner
+                        join state in _channelPartnerManagementContext.States on channelPartner.StateId equals state.Id
+                        join city in _channelPartnerManagementContext.City on channelPartner.CityId equals city.Id
+                        join pincode in _channelPartnerManagementContext.Pincode on channelPartner.Pincode equals pincode.Id
+                        join mapping in _channelPartnerManagementContext.ChannelPartnerMapping on channelPartner.Id equals mapping.ChannelPartnerId
+                        join promotion in _channelPartnerManagementContext.PromotionalCycle on mapping.LevelId equals promotion.LevelId
+                        where channelPartner.Id == id && channelPartner.Active == true
+                        orderby channelPartner.Id
+                        select new
+                        {
+                            CpId = channelPartner.Id,
+                            FirstName = channelPartner.FirstName,
+                            LastName = channelPartner.LastName,
+                            Address = channelPartner.Address,
+                            Email = channelPartner.Email,
+                            Gender = channelPartner.Gender,
+                            ImageUrl = channelPartner.ProfilePictureUrl,
+                            DOB = channelPartner.DOB,
+                            ContactNo = channelPartner.ContactNo,
+                            AlternateContact = channelPartner.AlternateContact,
+                            TeachingExperience = channelPartner.TeachingExperience,
+                            Description = channelPartner.Description,
+                            ReferCode = channelPartner.ReferCode,
+                            StateName = state.Name,
+                            CityName = city.Name,
+                            Pincode = pincode.Name,
+                            CurrentLevel = promotion.Title
+                        };
+            var careerExpertData = query.FirstOrDefault();
+            return careerExpertData;
+        }
         #endregion
     }
 }

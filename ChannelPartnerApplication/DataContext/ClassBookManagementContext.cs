@@ -9,13 +9,8 @@ namespace ChannelPartnerApplication.DataContext
         {
         }
 
-        //#region Common
-
-        //public DbSet<Logs> Logs { get; set; }
-
-        //public DbSet<Users> Users { get; set; }
-
-        //#endregion
+        #region Common
+        #endregion
 
         #region OnModelCreating
 

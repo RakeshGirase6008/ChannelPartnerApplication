@@ -1,4 +1,4 @@
-CREATE PROCEDURE [Classbook_CalculateCommision]
+CREATE PROCEDURE [dbo].[Classbook_CalculateCommision]
 	@OrderId INT,
 	@ChannelPartnerId INT,
 	@OurAmount DECIMAL,
@@ -123,7 +123,7 @@ END
 
 
 GO
-CREATE PROCEDURE [Classbook_CalculateCommision_MonthEnd]
+CREATE PROCEDURE [dbo].[Classbook_CalculateCommision_MonthEnd]
 AS
 BEGIN
 	
@@ -292,4 +292,59 @@ BEGIN
 	CLOSE CUR_TEST
 	DEALLOCATE CUR_TEST
 	--End the Royalty
+END
+
+GO
+CREATE PROCEDURE [dbo].[ChannelPartner_GetLevelChart]
+AS
+BEGIN
+	SELECT 'LevelDiff' as [Type],'10%' as CurrentLevel,'15%' as PromotionLevel,'2' as [Target],'10%' as IncomePercentage
+	UNION
+	SELECT 'LevelDiff' as [Type],'15%' as CurrentLevel,'20%' as PromotionLevel,'4' as [Target],'15% OR 5%' as IncomePercentage
+	UNION
+	SELECT 'LevelDiff' as [Type],'20%' as CurrentLevel,'25%' as PromotionLevel,'8' as [Target],'20% OR 5%' as IncomePercentage
+	UNION
+	SELECT 'Residual' as [Type],'25%' as CurrentLevel,'25+%' as PromotionLevel,'16' as [Target],'25% OR 5%' as IncomePercentage
+	UNION
+	SELECT 'Residual' as [Type],'25+%' as CurrentLevel,'25++%' as PromotionLevel,'32' as [Target],'4% OR 2.5%' as IncomePercentage
+	UNION
+	SELECT 'Residual' as [Type],'25++%' as CurrentLevel,'25+++%' as PromotionLevel,'64' as [Target],'4% OR 2.5%' as IncomePercentage
+	UNION
+	SELECT 'Royalty' as [Type],'25+++%' as CurrentLevel,'Stage 1' as PromotionLevel,'128' as [Target],'4% OR 2.5%' as IncomePercentage
+	UNION
+	SELECT 'Royalty' as [Type],'Stage 1' as CurrentLevel,'Stage 2' as PromotionLevel,'256' as [Target],'2.5%' as IncomePercentage
+END
+
+GO
+CREATE PROCEDURE [dbo].[ChannelPartner_GetChannelPartnersList]
+	@ChannelPartnerId INT=0,
+	@Searchkeyword VARCHAR(100)='',
+	@LevelId INT=0,
+	@GenerationId INT=0
+AS
+BEGIN
+
+	DECLARE @SqlQuery VARCHAR(MAX)
+	DECLARE @WhereCondition VARCHAR(MAX)
+	SET @SqlQuery='
+		SELECT CP.Id,ISNULL(CP.Firstname,0) + ISNULL(CP.lastName,0),C.[Name],
+		IntroducerName=(Select ISNULL(FirstName,'''') + ISNULL(LastName,'''')  from ChannelPartner CPSub where CPSub.Id=CPM.ParentId),
+		CP.ProfilePictureURL,UniqueNo,CP.CreatedDate
+		FROM ChannelPartner CP
+		INNER JOIN ChannelPartnerMapping CPM ON CP.Id=CPM.ChannelPartnerId
+		INNER JOIN City C ON CP.CityId=C.Id
+		WHERE CP.Id=' + CONVERT(VARCHAR(10),@ChannelPartnerId)
+	IF @Searchkeyword!=''
+	BEGIN
+		SET @WhereCondition='AND CP.FirstName like %'+@Searchkeyword+'% OR CP.LastName like %'+@Searchkeyword+'%'
+	END
+	IF @LevelId!=0
+	BEGIN
+		SET @WhereCondition='AND CPM.LevelId=' +  CONVERT(VARCHAR(10),@LevelId)
+	END
+	IF @GenerationId!=0
+	BEGIN
+		SET @WhereCondition='AND FirstName like %'+@Searchkeyword+'% OR LastName like %'+@Searchkeyword+'%'
+	END
+	EXEC (@SqlQuery)
 END

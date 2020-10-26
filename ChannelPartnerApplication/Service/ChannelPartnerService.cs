@@ -1,15 +1,18 @@
 ﻿using ChannelPartnerApplication.DataContext;
 using ChannelPartnerApplication.Domain.ChannelPartner;
 using ChannelPartnerApplication.Domain.Common;
-using ChannelPartnerApplication.Factory;
+using ChannelPartnerApplication.Extension;
 using ChannelPartnerApplication.Models.RequestModels;
+using ChannelPartnerApplication.Models.ResponseModel;
 using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -53,9 +56,9 @@ namespace ChannelPartnerApplication.Service
         /// <summary>
         /// Ge the ConnectionString
         /// </summary>
-        public string GetConnectionStringForClassbook()
+        public string GetConnectionStringForChannelPartner()
         {
-            return _configuration.GetConnectionString("ClassBookManagementeDatabase");
+            return _configuration.GetConnectionString("ChannelPartnerDatabase");
         }
 
         /// <summary>
@@ -218,6 +221,18 @@ namespace ChannelPartnerApplication.Service
             }
             return true;
         }
+        public string NumberToWords(int number)
+        {
+            if (number == 0)
+                return "zero";
+            string words = "";
+            if (number > 0)
+            {
+                var unitsMap = new[] { "zero", "First", "Second", "Third", "Fourth", "Fifth", "Sixth" };
+                words = unitsMap[number];
+            }
+            return words + " Generations";
+        }
 
         ///// <summary>
         ///// SaveUserData
@@ -347,7 +362,6 @@ namespace ChannelPartnerApplication.Service
 
         #endregion
 
-
         #region SendRegister
 
         public IRestResponse RegisterMethod(CommonRegistrationModel model, string ApiName)
@@ -374,6 +388,100 @@ namespace ChannelPartnerApplication.Service
             request.AddHeader("AuthorizeTokenKey", _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"]);
             IRestResponse response = client.Execute(request);
             return response;
+        }
+        #endregion
+
+        #region Common
+
+
+        /// <summary>
+        /// Get All Moduel Data by Module Id
+        /// </summary>
+        public IList<LevelIncomeListingModel> GetLevelChart()
+        {
+            IList<LevelIncomeListingModel> listingModels = new List<LevelIncomeListingModel>();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_ChannelPartner_GetLevelChart.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        LevelIncomeListingModel ISP = new LevelIncomeListingModel()
+                        {
+                            Type = reader.GetValue<string>("Type"),
+                            CurrentLevel = reader.GetValue<string>("CurrentLevel"),
+                            PromotionLevel = reader.GetValue<string>("PromotionLevel"),
+                            Target = reader.GetValue<string>("Target"),
+                            IncomePercentage = reader.GetValue<string>("IncomePercentage"),
+                        };
+                        listingModels.Add(ISP);
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
+        }
+
+
+        /// <summary>
+        /// Get All Moduel Data by Module Id
+        /// </summary>
+        public IList<ChannelPartnerListingModel> GetChannelPartnerListing(int CpId, string searchKeyword = "", int levelId = 0, int generationId = 0)
+        {
+            IList<ChannelPartnerListingModel> listingModels = new List<ChannelPartnerListingModel>();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_ChannelPartner_GetChannelPartnersList.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+                cmd.Parameters.Add("@ChannelPartnerId", SqlDbType.Int).Value = CpId;
+                cmd.Parameters.Add("@Searchkeyword", SqlDbType.VarChar).Value = searchKeyword;
+                cmd.Parameters.Add("@LevelId", SqlDbType.Int).Value = levelId;
+                cmd.Parameters.Add("@GenerationId", SqlDbType.Int).Value = generationId;
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        ChannelPartnerListingModel ISP = new ChannelPartnerListingModel()
+                        {
+                            Id = reader.GetValue<int>("Id"),
+                            Name = reader.GetValue<string>("Name"),
+                            City = reader.GetValue<string>("City"),
+                            IntroducerName = reader.GetValue<string>("IntroducerName"),
+                            ProfilePictureURL = reader.GetValue<string>("ProfilePictureURL"),
+                            UniqueNo = reader.GetValue<string>("UniqueNo"),
+                            RegistrationDate = reader.GetValue<DateTime>("RegistrationDate"),
+                        };
+                        listingModels.Add(ISP);
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
         }
         #endregion
     }
