@@ -29,7 +29,6 @@ BEGIN
 
 	WHILE (@ParentId!=0)
 	BEGIN
-		
 		SELECT
 				@ParentId=CPM.ParentId ,
 				@LevelId=CPM.LevelId,
@@ -324,27 +323,68 @@ CREATE PROCEDURE [dbo].[ChannelPartner_GetChannelPartnersList]
 AS
 BEGIN
 
+	--// Create Temp Table
+	CREATE TABLE #TempChannelPartner
+	(
+		CpId INT NOT NULL,
+		Generation INT NOT NULL,
+		LevelId INT NOT NULL,
+		ParentId INT NOT NULL
+	)
+	
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,1,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	WHERE ParentId=@ChannelPartnerId
+
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,2,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	INNER JOIN #TempChannelPartner Gtwo ON Gtwo.CpId=CPM.ParentId
+
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,3,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	INNER JOIN #TempChannelPartner GThree ON GThree.CpId=CPM.ParentId
+	WHERE Generation=2
+
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,4,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	INNER JOIN #TempChannelPartner GFourth ON GFourth.CpId=CPM.ParentId
+	WHERE Generation=3
+
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,5,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	INNER JOIN #TempChannelPartner GFive ON GFive.CpId=CPM.ParentId
+	WHERE Generation=4
+
+	INSERT INTO #TempChannelPartner
+	SELECT ChannelPartnerId,6,CPM.LevelId,CPM.ParentId FROM ChannelPartnerMapping CPM
+	INNER JOIN #TempChannelPartner GSix ON GSix.CpId=CPM.ParentId
+	WHERE Generation=5
+
+
 	DECLARE @SqlQuery VARCHAR(MAX)
-	DECLARE @WhereCondition VARCHAR(MAX)
+	DECLARE @WhereCondition VARCHAR(MAX)=''
 	SET @SqlQuery='
-		SELECT CP.Id,ISNULL(CP.Firstname,0) + ISNULL(CP.lastName,0),C.[Name],
-		IntroducerName=(Select ISNULL(FirstName,'''') + ISNULL(LastName,'''')  from ChannelPartner CPSub where CPSub.Id=CPM.ParentId),
-		CP.ProfilePictureURL,UniqueNo,CP.CreatedDate
+		SELECT CP.Id,(ISNULL(CP.Firstname,'''') + '' '' + ISNULL(CP.lastName,'''')) as [FullName],
+		C.[Name] as CityName,
+		((Select ISNULL(FirstName,'''') +  '' '' + ISNULL(LastName,'''')  from ChannelPartner CPSub where CPSub.Id=CPT.ParentId)) As IntroducerName,
+		CP.ProfilePictureURL,UniqueNo,CONVERT(VARCHAR(20),CP.CreatedDate,105) as RegistrationDate
 		FROM ChannelPartner CP
-		INNER JOIN ChannelPartnerMapping CPM ON CP.Id=CPM.ChannelPartnerId
-		INNER JOIN City C ON CP.CityId=C.Id
-		WHERE CP.Id=' + CONVERT(VARCHAR(10),@ChannelPartnerId)
+		INNER JOIN #TempChannelPartner CPT ON CPT.CpId=CP.Id
+		INNER JOIN City C ON CP.CityId=C.Id WHERE 1=1'
+
 	IF @Searchkeyword!=''
 	BEGIN
-		SET @WhereCondition='AND CP.FirstName like %'+@Searchkeyword+'% OR CP.LastName like %'+@Searchkeyword+'%'
+		SET @WhereCondition=@WhereCondition + ' AND CP.FirstName like ''%'+@Searchkeyword+'%'' OR CP.LastName like ''%'+@Searchkeyword+'%'' OR CP.Email like ''%'+@Searchkeyword+'%'' OR CP.ContactNo like ''%'+@Searchkeyword+'%'''
 	END
-	IF @LevelId!=0
+	IF @LevelId > 0
 	BEGIN
-		SET @WhereCondition='AND CPM.LevelId=' +  CONVERT(VARCHAR(10),@LevelId)
+		
+		SET @WhereCondition=@WhereCondition+ ' AND CPT.LevelId=' +  CONVERT(VARCHAR(10),@LevelId)
 	END
-	IF @GenerationId!=0
+	IF @GenerationId > 0
 	BEGIN
-		SET @WhereCondition='AND FirstName like %'+@Searchkeyword+'% OR LastName like %'+@Searchkeyword+'%'
+		SET @WhereCondition=@WhereCondition + ' AND CPT.Generation=' +  CONVERT(VARCHAR(10),@GenerationId)
 	END
+	SET @SqlQuery = @SqlQuery + @WhereCondition
 	EXEC (@SqlQuery)
 END

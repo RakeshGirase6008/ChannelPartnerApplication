@@ -466,8 +466,8 @@ namespace ChannelPartnerApplication.Service
                         ChannelPartnerListingModel ISP = new ChannelPartnerListingModel()
                         {
                             Id = reader.GetValue<int>("Id"),
-                            Name = reader.GetValue<string>("Name"),
-                            City = reader.GetValue<string>("City"),
+                            FullName = reader.GetValue<string>("FullName"),
+                            CityName = reader.GetValue<string>("CityName"),
                             IntroducerName = reader.GetValue<string>("IntroducerName"),
                             ProfilePictureURL = reader.GetValue<string>("ProfilePictureURL"),
                             UniqueNo = reader.GetValue<string>("UniqueNo"),
