@@ -2,6 +2,7 @@
 {
     public class LevelIncomeListingModel
     {
+        public int ChannelPartnerId { get; set; }
         public string Type { get; set; }
         public string CurrentLevel { get; set; }
         public string PromotionLevel { get; set; }

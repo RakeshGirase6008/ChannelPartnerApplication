@@ -360,6 +360,11 @@ namespace ChannelPartnerApplication.Service
             return ChannelPartner.Id;
         }
 
+        public ChannelPartner GetChannelPartnerById(int id)
+        {
+            return _channelPartnerManagementContext.ChannelPartner.Where(x => x.Id == id).FirstOrDefault();
+        }
+
         #endregion
 
         #region SendRegister
@@ -436,6 +441,45 @@ namespace ChannelPartnerApplication.Service
             }
         }
 
+        public IList<PromotionListingModel> GetChannelPartnerPromotion(int id)
+        {
+            IList<PromotionListingModel> listingModels = new List<PromotionListingModel>();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_ChannelPartner_GetPromotionLevel.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+                cmd.Parameters.Add("@ChannelPartnerId", SqlDbType.Int).Value = id;
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        PromotionListingModel ISP = new PromotionListingModel()
+                        {
+                            ChannelPartnerId = reader.GetValue<int>("ChannelPartnerId"),
+                            CurrentLevel = reader.GetValue<string>("CurrentLevel"),
+                            NextLevel = reader.GetValue<string>("NextLevel"),
+                            Target = reader.GetValue<int>("Target"),
+                            Achieved = reader.GetValue<int>("Achieved"),
+                            Pending = reader.GetValue<int>("Pending"),
+                        };
+                        listingModels.Add(ISP);
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
+        }
 
         /// <summary>
         /// Get All Moduel Data by Module Id

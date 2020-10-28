@@ -114,11 +114,11 @@ namespace ChannelPartnerApplication.Controllers.API
 
         #region GetChannelPartnerDetails
 
-        // GET api/ChannelPartner/GetChannelPartnerDetails
-        [HttpPost("GetChannelPartnerDetails")]
-        public IEnumerable<ChannelPartnerListingModel> GetChannelPartnersList([FromForm] string searchKeyword, [FromForm] int levelId, [FromForm] int generationId)
+        // GET api/ChannelPartner/GetChannelPartnersList
+        [HttpPost("GetChannelPartnersList")]
+        public IEnumerable<ChannelPartnerListingModel> GetChannelPartnersList([FromForm] ListingSearchModel model)
         {
-            return _channelPartnerService.GetChannelPartnerListing(1,searchKeyword,levelId,generationId) ;
+            return _channelPartnerService.GetChannelPartnerListing(1, model.searchKeyword, model.levelId, model.generationId);
         }
 
         //// GET api/ChannelPartner/GetChannelPartnerById/5
@@ -133,16 +133,16 @@ namespace ChannelPartnerApplication.Controllers.API
                         join promotion in _channelPartnerManagementContext.PromotionalCycle on mapping.LevelId equals promotion.LevelId
                         where channelPartner.Id == id && channelPartner.Active == true
                         orderby channelPartner.Id
-                        select new
+                        select new ChannelPartnerProfileModel
                         {
-                            CpId = channelPartner.Id,
+                            ChannelPartnerId = channelPartner.Id,
                             FirstName = channelPartner.FirstName,
                             LastName = channelPartner.LastName,
                             Address = channelPartner.Address,
                             Email = channelPartner.Email,
                             Gender = channelPartner.Gender,
-                            ImageUrl = channelPartner.ProfilePictureUrl,
-                            DOB = channelPartner.DOB,
+                            ImageUrl = _channelPartnerModelFactory.PrepareURL(channelPartner.ProfilePictureUrl),
+                            DOB = channelPartner.DOB.ToString(),
                             ContactNo = channelPartner.ContactNo,
                             AlternateContact = channelPartner.AlternateContact,
                             TeachingExperience = channelPartner.TeachingExperience,
@@ -151,11 +151,22 @@ namespace ChannelPartnerApplication.Controllers.API
                             StateName = state.Name,
                             CityName = city.Name,
                             Pincode = pincode.Name,
-                            CurrentLevel = promotion.Title
+                            CurrentLevel = promotion.Title,
+                            ParentId = mapping.ParentId
                         };
-            var careerExpertData = query.FirstOrDefault();
-            return careerExpertData;
+            var channelPartnerData = query.FirstOrDefault();
+            var cpData = _channelPartnerService.GetChannelPartnerById(channelPartnerData.ParentId);
+            channelPartnerData.IntroducerName = cpData != null ? cpData.FirstName + " " + cpData.LastName : string.Empty;
+            return channelPartnerData;
         }
+
+        //// GET api/ChannelPartner/GetChannelPartnerPromotion/5
+        [HttpGet("GetChannelPartnerPromotion/{id:int}")]
+        public object GetChannelPartnerPromotion(int id)
+        {
+            return _channelPartnerService.GetChannelPartnerPromotion(id);
+        }
+
         #endregion
     }
 }

@@ -388,3 +388,20 @@ BEGIN
 	SET @SqlQuery = @SqlQuery + @WhereCondition
 	EXEC (@SqlQuery)
 END
+
+GO
+CREATE PROCEDURE [ChannelPartner_GetPromotionLevel]
+	@ChannelPartnerId INT
+AS
+BEGIN
+	SELECT
+	@ChannelPartnerId as ChannelPartnerId,
+	PC.Title as CurrentLevel,
+	((Select ISNULL(Title,'') FROM PromotionalCycle PCsub where PCsub.LevelId=(PC.LevelId+1))) As NextLevel,
+	PC.AchievementCount as [Target],
+	CPM.CurrentCount As Achieved,
+	(PC.AchievementCount-CPM.CurrentCount) as Pending
+	from ChannelPartnerMapping CPM
+	INNER JOIN PromotionalCycle PC ON PC.LevelId=CPM.LevelId 
+	WHERE ChannelPartnerId=@ChannelPartnerId
+END
