@@ -8,6 +8,7 @@ using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -167,6 +168,13 @@ namespace ChannelPartnerApplication.Controllers.API
             return _channelPartnerService.GetChannelPartnerPromotion(id);
         }
 
+
+        //// GET api/ChannelPartner/GetClassBookInformations/5
+        [HttpGet("GetClassBookInformations/{id:int}")]
+        public object GetClassBookInformations(int id)
+        {
+            return _channelPartnerService.GetClassBookInformations(id);
+        }
         #endregion
     }
 }

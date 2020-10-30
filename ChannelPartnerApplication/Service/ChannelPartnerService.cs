@@ -29,6 +29,7 @@ namespace ChannelPartnerApplication.Service
         private readonly IWebHostEnvironment _env;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
+        private readonly ClassBookManagementContext _classBookManagementContext;
 
 
         #endregion
@@ -40,13 +41,15 @@ namespace ChannelPartnerApplication.Service
             IConfiguration configuration,
             IWebHostEnvironment env,
             IHttpContextAccessor httpContextAccessor,
-            ChannelPartnerManagementContext channelPartnerManagementContext)
+            ChannelPartnerManagementContext channelPartnerManagementContext,
+            ClassBookManagementContext classBookManagementContext)
         {
             this._fileService = fileService;
             this._configuration = configuration;
             this._env = env;
             this._httpContextAccessor = httpContextAccessor;
             this._channelPartnerManagementContext = channelPartnerManagementContext;
+            this._classBookManagementContext = classBookManagementContext;
         }
 
         #endregion
@@ -481,6 +484,37 @@ namespace ChannelPartnerApplication.Service
             }
         }
 
+        public IList<int> GetAllChildPartners(int cpId)
+        {
+            IList<int> listingModels = new List<int>();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_ChannelPartner_GetAllChilds.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+                cmd.Parameters.Add("@ChannelPartnerId", SqlDbType.Int).Value = cpId;
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        listingModels.Add(reader.GetValue<int>("ChildId"));
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
+        }
+
         /// <summary>
         /// Get All Moduel Data by Module Id
         /// </summary>
@@ -516,6 +550,57 @@ namespace ChannelPartnerApplication.Service
                             ProfilePictureURL = reader.GetValue<string>("ProfilePictureURL"),
                             UniqueNo = reader.GetValue<string>("UniqueNo"),
                             RegistrationDate = reader.GetValue<DateTime>("RegistrationDate"),
+                        };
+                        listingModels.Add(ISP);
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
+        }
+
+        /// <summary>
+        /// Get the referCode by ChannelPartnerId
+        /// </summary>
+        public string GetReferCode(int channelpartnerId)
+        {
+            return _channelPartnerManagementContext.ChannelPartner.Where(x => x.Id == channelpartnerId).FirstOrDefault().ReferCode;
+        }
+        #endregion
+
+        #region ClassBook Management
+
+        public IList<ClassBookInformations> GetClassBookInformations(int id)
+        {
+            IList<ClassBookInformations> listingModels = new List<ClassBookInformations>();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_ChannelPartner_GetClassBookInformation.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+                cmd.Parameters.Add("@ChannelPartnerId", SqlDbType.Int).Value = id;
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        ClassBookInformations ISP = new ClassBookInformations()
+                        {
+                            TypeId = reader.GetValue<int>("TypeId"),
+                            Type = reader.GetValue<string>("MyType"),
+                            Name = reader.GetValue<string>("Name"),
+                            IntroducerName = reader.GetValue<string>("IntroducerName"),
+                            Direct = reader.GetValue<bool>("Direct"),
+                            UniqueNo = reader.GetValue<string>("UniqueNo"),
                         };
                         listingModels.Add(ISP);
                     }

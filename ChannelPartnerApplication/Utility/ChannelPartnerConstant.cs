@@ -58,9 +58,12 @@
         #endregion
 
         #region StoredProcedure
+
         public const string SP_ChannelPartner_GetLevelChart = "ChannelPartner_GetLevelChart";
         public const string SP_ChannelPartner_GetChannelPartnersList = "ChannelPartner_GetChannelPartnersList";
         public const string SP_ChannelPartner_GetPromotionLevel = "ChannelPartner_GetPromotionLevel";
+        public const string SP_ChannelPartner_GetAllChilds = "ChannelPartner_GetAllChilds";
+        public const string SP_ChannelPartner_GetClassBookInformation = "ChannelPartner_GetClassBookInformation";
 
         #endregion
 

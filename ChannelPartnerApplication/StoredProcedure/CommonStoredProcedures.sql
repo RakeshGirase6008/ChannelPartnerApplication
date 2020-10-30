@@ -405,3 +405,99 @@ BEGIN
 	INNER JOIN PromotionalCycle PC ON PC.LevelId=CPM.LevelId 
 	WHERE ChannelPartnerId=@ChannelPartnerId
 END
+
+GO
+CREATE PROCEDURE [ChannelPartner_GetAllChilds]
+	@ChannelPartnerId INT=0
+AS
+BEGIN
+
+	WITH RCTE AS 
+	(
+	    SELECT * , ChannelPartnerId AS TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+		WHERE c.ParentId=@ChannelPartnerId
+	
+	    UNION ALL
+	
+	    SELECT c.* , r.TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+	    INNER JOIN RCTE r ON c.ParentId = r.ChannelPartnerId
+	)
+	SELECT r.ChannelPartnerId AS ChildId 
+	FROM RCTE r
+	ORDER BY ParentID;
+END
+
+GO
+CREATE PROCEDURE [ChannelPartner_GetClassBookInformation]
+	@ChannelPartnerId INT=0
+AS
+BEGIN
+	
+	IF OBJECT_ID('tempdb..#TempMain') IS NOT NULL DROP TABLE #TempMain
+	IF OBJECT_ID('tempdb..#Temp') IS NOT NULL DROP TABLE #TempMain
+	CREATE TABLE #TempMain
+	(
+		MyType VARCHAR(20),
+		TypeId INT,
+		[Name] VARCHAR(1000),
+		ChannelPartnerId INT,
+		Direct BIT
+	)
+
+	DECLARE @MainReferCode VARCHAR(100)
+	SELECT @MainReferCode=ISNULL(ReferCode,'') FROM ChannelPartner WHERE Id=@ChannelPartnerId;
+
+	WITH RCTE AS 
+	(
+	    SELECT * , ChannelPartnerId AS TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+		WHERE c.ParentId=@ChannelPartnerId
+
+	    UNION ALL
+	
+	    SELECT c.* , r.TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+	    INNER JOIN RCTE r ON c.ParentId = r.ChannelPartnerId
+	)
+	SELECT r.ChannelPartnerId AS ChildId,C.ReferCode
+	INTO #Temp
+	FROM RCTE r INNER JOIN ChannelPartner C ON r.ChannelPartnerId=C.Id
+	ORDER BY ParentID;
+
+	
+	INSERT INTO #Temp VALUES(@ChannelPartnerId,@MainReferCode)
+
+	
+	INSERT INTO #TempMain
+	SELECT 'Class' As MyType, C.Id As TypeId,C.[Name],T.ChildId as ChannelPartnerId,0 as Direct
+	FROM #Temp T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Classes] C ON T.ReferCode=C.ReferCode
+	UNION
+	SELECT 'Teacher' As MyType,T1.Id As TypeId ,T1.FirstName + ' ' + T1.LastName as [Name],T.ChildId as ChannelPartnerId,0 as Direct
+	FROM #Temp T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Teacher] T1 ON T.ReferCode=T1.ReferCode
+	UNION
+	SELECT 'CareerExpert' As MyType,C.Id As TypeId, C.FirstName + ' ' + C.LastName as [Name],T.ChildId as ChannelPartnerId,0 as Direct
+	FROM #Temp T
+	INNER JOIN [onthef1x_Classbook].[dbo].[CareerExpert] C ON T.ReferCode=C.ReferCode
+	UNION
+	SELECT 'Student' As MyType,S.Id As TypeId, S.FirstName + ' ' + S.LastName as [Name],T.ChildId as ChannelPartnerId,0 as Direct
+	FROM #Temp T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Student] S ON T.ReferCode=S.ReferCode
+	UNION
+	SELECT 'School' As MyType,S.Id As TypeId, S.[Name],T.ChildId as ChannelPartnerId,0 as Direct
+	FROM #Temp T
+	INNER JOIN [onthef1x_Classbook].[dbo].[School] S ON T.ReferCode=S.ReferCode
+
+	UPDATE #TempMain
+	SET Direct=1
+	WHERE ChannelPartnerId=@ChannelPartnerId
+
+	SELECT TM.*,
+	ISNULL(C.FirstName,'') + ' ' + ISNULL(C.LastName,'') as IntroducerName,
+	C.UniqueNo
+	FROM #TempMain TM
+	INNER JOIN ChannelPartner C ON C.Id=TM.ChannelPartnerId
+END
