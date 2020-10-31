@@ -66,6 +66,5 @@
         public const string SP_ChannelPartner_GetClassBookInformation = "ChannelPartner_GetClassBookInformation";
 
         #endregion
-
     }
 }

@@ -12,16 +12,13 @@ namespace ChannelPartnerApplication.ActionFilter
         #region Fields
 
         private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
-        private readonly ClassBookManagementContext _classBookManagementContext;
 
         #endregion
 
         #region Ctor
-        public ControllerFilterExample(ChannelPartnerManagementContext channelPartnerManagementContext,
-            ClassBookManagementContext classBookManagementContext)
+        public ControllerFilterExample(ChannelPartnerManagementContext channelPartnerManagementContext)
         {
             this._channelPartnerManagementContext = channelPartnerManagementContext;
-            this._classBookManagementContext = classBookManagementContext;
         }
 
         #endregion

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChannelPartnerApplication.Controllers.API
 {
-    //[ServiceFilter(typeof(ControllerFilterExample))]
+    [ServiceFilter(typeof(ControllerFilterExample))]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     [ApiVersion("1")]

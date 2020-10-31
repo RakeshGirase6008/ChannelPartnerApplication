@@ -8,6 +8,7 @@ using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RestSharp;
 using System;
@@ -374,11 +375,12 @@ namespace ChannelPartnerApplication.Service
 
         public IRestResponse RegisterMethod(CommonRegistrationModel model, string ApiName)
         {
+            var secretKey = _classBookManagementContext.Settings.Where(x => x.Name == "ApplicationSetting.SecretKey").AsNoTracking().FirstOrDefault();
             var client = new RestClient(ChannelPartnerConstant.ClassbookWebSite_HostURL.ToString() + ApiName.ToString());
             client.Timeout = -1;
             var request = new RestRequest(Method.POST);
-            request.AddHeader("Secret_Key", _httpContextAccessor.HttpContext.Request.Headers["Secret_Key"]);
-            request.AddHeader("AuthorizeTokenKey", _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"]);
+            request.AddHeader("Secret_Key", secretKey.Value.ToString());
+            request.AddHeader("AuthorizeTokenKey", "Default");
             //request.AddFile("file", model.File.FileName, model.File.ContentType);
             request.AddParameter("data", model.Data);
             request.AddParameter("DeviceId", model.DeviceId);
@@ -389,10 +391,11 @@ namespace ChannelPartnerApplication.Service
 
         public IRestResponse GetCommonFromClassBook(string ApiName)
         {
+            var secretKey = _classBookManagementContext.Settings.Where(x => x.Name == "ApplicationSetting.SecretKey").AsNoTracking().FirstOrDefault();
             var client = new RestClient(ChannelPartnerConstant.ClassbookWebSite_HostURL.ToString() + ApiName.ToString());
             client.Timeout = -1;
             var request = new RestRequest(Method.GET);
-            request.AddHeader("Secret_Key", _httpContextAccessor.HttpContext.Request.Headers["Secret_Key"]);
+            request.AddHeader("Secret_Key", secretKey.Value.ToString());
             request.AddHeader("AuthorizeTokenKey", _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"]);
             IRestResponse response = client.Execute(request);
             return response;

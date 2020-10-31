@@ -7,6 +7,7 @@ using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -113,15 +114,6 @@ namespace ChannelPartnerApplication.Controllers.API
             return levels;
         }
 
-
-        //// GET api/Common/GetStates
-        //[HttpGet("GetStates")]
-        //public string GetStates()
-        //{
-        //    IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/common/getStates");
-        //    return response.Content;
-        //}
-
         // GET api/Common/GetLevelChartInformations
         [HttpGet("GetLevelChartInformations")]
         public IEnumerable<object> GetLevelChartInformations()
@@ -207,6 +199,49 @@ namespace ChannelPartnerApplication.Controllers.API
                 responseModel.Message = "Old Password is not matching";
                 return StatusCode((int)HttpStatusCode.NotFound, responseModel);
             }
+        }
+        #endregion
+
+        #region EditProfile
+
+        // GET api/Common/GetClassIdById/5
+        [HttpGet("GetClassIdById/{id:int}")]
+        public object EditProfileForClass(int id)
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Classes/EditProfileForClass/" + id.ToString() + "");
+            return response.Content;
+        }
+
+        // GET api/Common/EditProfileForClass/5
+        [HttpGet("GetCareerExpertById/{id:int}")]
+        public object GetCareerExpertById(int id)
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/CareerExpert/GetCareerExpertById/" + id.ToString() + "");
+            return response.Content;
+        }
+
+        // GET api/Common/GetStudentById/5
+        [HttpGet("GetStudentById/{id:int}")]
+        public object GetStudentById(int id)
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Student/GetStudentById/" + id.ToString() + "");
+            return response.Content;
+        }
+
+        // GET api/Common/GetSchoolById/5
+        [HttpGet("GetSchoolById/{id:int}")]
+        public object GetSchoolById(int id)
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/School/GetSchoolById/" + id.ToString() + "");
+            return response.Content;
+        }
+
+        // GET api/Common/EditProfileForClass/5
+        [HttpGet("GetTeacherById/{id:int}")]
+        public object GetTeacherById(int id)
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Teacher/EditProfileForTeacher/" + id.ToString() + "");
+            return response.Content;
         }
         #endregion
     }
