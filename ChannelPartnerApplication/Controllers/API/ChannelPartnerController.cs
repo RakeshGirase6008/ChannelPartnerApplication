@@ -175,6 +175,15 @@ namespace ChannelPartnerApplication.Controllers.API
         {
             return _channelPartnerService.GetClassBookInformations(id);
         }
+
+        //// GET api/ChannelPartner/MyStatusInformation/5
+        [HttpGet("MyStatusInformation/{id:int}")]
+        public object MyStatusInformation(int id)
+        {
+            return _channelPartnerService.MyStatusInformation(id);
+        }
+
+        
         #endregion
     }
 }

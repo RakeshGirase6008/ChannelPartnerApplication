@@ -615,6 +615,45 @@ namespace ChannelPartnerApplication.Service
                 return listingModels;
             }
         }
+
+        public MyStatusInformation MyStatusInformation(int id)
+        {
+            MyStatusInformation listingModels = new MyStatusInformation();
+            SqlConnection connection = new SqlConnection(GetConnectionStringForChannelPartner());
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            //create a command object
+            using (var cmd = connection.CreateCommand())
+            {
+                //command to execute
+                cmd.CommandText = ChannelPartnerConstant.SP_Classbook_GetMyStatusInformation.ToString();
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = 60;
+                cmd.Parameters.Add("@ChannelPartnerId", SqlDbType.Int).Value = id;
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    while (reader.Read())
+                    {
+                        listingModels.CurrentLevel = reader.GetValue<string>("CurrentLevel");
+                        listingModels.NextLevel = reader.GetValue<string>("NextLevel");
+                        listingModels.Target = reader.GetValue<int>("Target");
+                        listingModels.Achieved = reader.GetValue<int>("Achieved");
+                        listingModels.Pending = reader.GetValue<int>("Pending");
+                        listingModels.Student = reader.GetValue<int>("Student");
+                        listingModels.Classes = reader.GetValue<int>("Classes");
+                        listingModels.Teacher = reader.GetValue<int>("Teacher");
+                        listingModels.CareerExpert = reader.GetValue<int>("CareerExpert");
+                    }
+                };
+                //close up the reader, we're done saving results
+                reader.Close();
+                //close connection
+                connection.Close();
+                return listingModels;
+            }
+        }
         #endregion
     }
 }

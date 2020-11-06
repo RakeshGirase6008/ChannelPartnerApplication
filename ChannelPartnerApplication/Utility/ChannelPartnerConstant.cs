@@ -64,6 +64,8 @@
         public const string SP_ChannelPartner_GetPromotionLevel = "ChannelPartner_GetPromotionLevel";
         public const string SP_ChannelPartner_GetAllChilds = "ChannelPartner_GetAllChilds";
         public const string SP_ChannelPartner_GetClassBookInformation = "ChannelPartner_GetClassBookInformation";
+        public const string SP_Classbook_GetMyStatusInformation = "Classbook_GetMyStatusInformation";
+        
 
         #endregion
     }
