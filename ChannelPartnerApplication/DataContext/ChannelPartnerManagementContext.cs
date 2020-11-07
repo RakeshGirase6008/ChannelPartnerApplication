@@ -20,6 +20,9 @@ namespace ChannelPartnerApplication.DataContext
         public DbSet<ChannelPartner> ChannelPartner { get; set; }
         public DbSet<ChannelPartnerMapping> ChannelPartnerMapping { get; set; }
         public DbSet<PromotionalCycle> PromotionalCycle { get; set; }
+        public DbSet<RoyaltyMapping> RoyaltyMapping { get; set; }
+        public DbSet<PromotionHistory> PromotionHistory { get; set; }
+        public DbSet<CommissionHistory> CommissionHistory { get; set; }
 
         #endregion
 

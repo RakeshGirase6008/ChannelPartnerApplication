@@ -58,7 +58,7 @@ namespace ChannelPartnerApplication.Controllers.API
                     {
                         (int channelPartnerId, string uniqueNo) = _channelPartnerService.SaveChannelPartner(ChannelPartnerData, model.Files);
                         string UserName = ChannelPartnerData.FirstName + uniqueNo;
-                        var user = _channelPartnerService.SaveUserData(channelPartnerId, Module.ChannelPartner, UserName, ChannelPartnerData.Email, model.FCMId, model.DeviceId);
+                        var user = _channelPartnerService.SaveUserData(channelPartnerId, Module.ChannelPartner, UserName, ChannelPartnerData.Email, model.FCMId);
                         await Task.Run(() => _channelPartnerService.SendVerificationLinkEmail(ChannelPartnerData.Email, user.Password, Module.ChannelPartner.ToString()));
                         responseModel.Message = ChannelPartnerConstantString.Register_ChannelPartner_Success.ToString();
                         responseModel.Data = _channelPartnerModelFactory.PrepareUserDetail(user);
@@ -167,7 +167,6 @@ namespace ChannelPartnerApplication.Controllers.API
         {
             return _channelPartnerService.GetChannelPartnerPromotion(id);
         }
-
 
         //// GET api/ChannelPartner/GetClassBookInformations/5
         [HttpGet("GetClassBookInformations/{id:int}")]

@@ -88,25 +88,30 @@ namespace ChannelPartnerApplication.Service
         /// </summary>
         public string GenerateUniqueNo(string uniqueNo, string firstWord, string secondWord)
         {
-            int sno;
-            if (uniqueNo == null)
+            if (!string.IsNullOrEmpty(firstWord) && !string.IsNullOrEmpty(secondWord))
             {
-                sno = 10001;
+                int sno;
+                if (uniqueNo == null)
+                {
+                    sno = 10001;
+                }
+                else
+                {
+                    string tt = uniqueNo;
+                    int result = 0;
+                    bool success = int.TryParse(new string(tt
+                                         .SkipWhile(x => !char.IsDigit(x))
+                                         .TakeWhile(x => char.IsDigit(x))
+                                         .ToArray()), out result);
+                    sno = result + 1;
+                }
+                string cpf = firstWord.Substring(0, 1).ToString().ToUpper();
+                string cpl = secondWord.Substring(0, 1).ToString().ToUpper();
+                uniqueNo = cpf + cpl + sno.ToString();
+                return uniqueNo;
             }
-            else
-            {
-                string tt = uniqueNo;
-                int result = 0;
-                bool success = int.TryParse(new string(tt
-                                     .SkipWhile(x => !char.IsDigit(x))
-                                     .TakeWhile(x => char.IsDigit(x))
-                                     .ToArray()), out result);
-                sno = result + 1;
-            }
-            string cpf = firstWord.Substring(0, 1).ToString().ToUpper();
-            string cpl = secondWord.Substring(0, 1).ToString().ToUpper();
-            uniqueNo = cpf + cpl + sno.ToString();
-            return uniqueNo;
+            return string.Empty;
+
         }
 
         /// <summary>
@@ -241,7 +246,7 @@ namespace ChannelPartnerApplication.Service
         ///// <summary>
         ///// SaveUserData
         ///// </summary>
-        public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId, string deviceId)
+        public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId)
         {
             var password = GeneratePassword(true, true, true, false, false, 16);
             Users user = new Users();
@@ -257,7 +262,6 @@ namespace ChannelPartnerApplication.Service
             user.FCMId = FCMId;
             _channelPartnerManagementContext.Users.Add(user);
             _channelPartnerManagementContext.SaveChanges();
-            //SaveDeviceAuthorizationData(user, deviceId);
             return user;
         }
 
@@ -576,6 +580,9 @@ namespace ChannelPartnerApplication.Service
 
         #region ClassBook Management
 
+        /// <summary>
+        /// Get the Class Book Informations
+        /// </summary>
         public IList<ClassBookInformations> GetClassBookInformations(int id)
         {
             IList<ClassBookInformations> listingModels = new List<ClassBookInformations>();
@@ -616,6 +623,9 @@ namespace ChannelPartnerApplication.Service
             }
         }
 
+        /// <summary>
+        /// ChannelPartner Status Level & Class book Count Information
+        /// </summary>
         public MyStatusInformation MyStatusInformation(int id)
         {
             MyStatusInformation listingModels = new MyStatusInformation();
@@ -654,6 +664,7 @@ namespace ChannelPartnerApplication.Service
                 return listingModels;
             }
         }
+
         #endregion
     }
 }

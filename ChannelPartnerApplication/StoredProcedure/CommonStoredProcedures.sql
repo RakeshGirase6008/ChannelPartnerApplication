@@ -553,37 +553,124 @@ BEGIN
 
 	INSERT INTO ##TempNew VALUES(@ChannelPartnerId,@MainReferCode)
 
-	
-	DECLARE @ClassCount INT=0
-	SELECT @ClassCount=COUNT(*)
-	FROM ##TempNew T
-	INNER JOIN [onthef1x_Classbook].[dbo].[Classes] C ON T.ReferCode=C.ReferCode
-	GROUP BY T.ChildId
-
 	DECLARE @StudentCount INT=0
 	SELECT @StudentCount=COUNT(*)
 	FROM ##TempNew T
 	INNER JOIN [onthef1x_Classbook].[dbo].[Student] C ON T.ReferCode=C.ReferCode
-	GROUP BY T.ChildId
+	WHERE YEAR(CreatedDate)=YEAR(GETDATE()) AND MONTH(CreatedDate)=MONTH(GETDATE())
 
 	DECLARE @TeacherCount INT=0
 	SELECT @TeacherCount=COUNT(*)
 	FROM ##TempNew T
 	INNER JOIN [onthef1x_Classbook].[dbo].[Teacher] C ON T.ReferCode=C.ReferCode
-	GROUP BY T.ChildId
+	WHERE YEAR(CreatedDate)=YEAR(GETDATE()) AND MONTH(CreatedDate)=MONTH(GETDATE())
+
+	
+	DECLARE @ClassCount INT=0
+	SELECT @ClassCount=COUNT(*)
+	FROM ##TempNew T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Classes] C ON T.ReferCode=C.ReferCode
+	WHERE YEAR(CreatedDate)=YEAR(GETDATE()) AND MONTH(CreatedDate)=MONTH(GETDATE())
+
 
 	DECLARE @CareerExpertCount INT=0
 	SELECT @CareerExpertCount=COUNT(*)
 	FROM ##TempNew T
 	INNER JOIN [onthef1x_Classbook].[dbo].[CareerExpert] C ON T.ReferCode=C.ReferCode
-	GROUP BY T.ChildId
+	WHERE YEAR(CreatedDate)=YEAR(GETDATE()) AND MONTH(CreatedDate)=MONTH(GETDATE())
 
 
+	UPDATE ##TempMain
+	SET Classes=@ClassCount,
+		Student=@StudentCount,
+		Teacher=@TeacherCount,
+		CareerExpert=@CareerExpertCount
+
+	SELECT * FROM ##TempMain
+END
+
+GO
+CREATE PROCEDURE [Classbook_IndivisualDirectIncome]
+	@ChannelPartnerId INT=0,
+	@CalculateIndirect BIT=0,
+	@Year INT=0,
+	@Month INT=0
+AS
+BEGIN
+
+	IF OBJECT_ID('tempdb..##TempMain') IS NOT NULL DROP TABLE ##TempMain
+	IF OBJECT_ID('tempdb..##TempNew') IS NOT NULL DROP TABLE ##TempNew
+	
+
+	DECLARE @MainReferCode VARCHAR(100)
+	SELECT @MainReferCode=ISNULL(ReferCode,'') FROM ChannelPartner WHERE Id=@ChannelPartnerId;
+	CREATE TABLE ##TempMain
+	(
+		TotalTurnOver DECIMAL(10,2),
+		TotalIncome DECIMAL(10,2)
+	)
+	
+	INSERT INTO ##TempMain VALUES(0,0)
+
+	ALTER TABLE ##TempMain
+	ADD Student INT NULL DEFAULT 0,
+		Classes INT NULL DEFAULT 0,
+		Teacher INT NULL DEFAULT 0,
+		CareerExpert INT NULL DEFAULT 0;
+
+			
+	WITH RCTE AS 
+	(
+	    SELECT * , ChannelPartnerId AS TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+		WHERE c.ParentId=@ChannelPartnerId
+
+	    UNION ALL
+	
+	    SELECT c.* , r.TopLevelParent
+	    FROM dbo.ChannelPartnerMapping c
+	    INNER JOIN RCTE r ON c.ParentId = r.ChannelPartnerId
+	)
+	SELECT r.ChannelPartnerId AS ChildId,C.ReferCode
+	INTO ##TempNew
+	FROM RCTE r INNER JOIN ChannelPartner C ON r.ChannelPartnerId=C.Id
+	ORDER BY ParentID;
+	
+	INSERT INTO ##TempNew VALUES(@ChannelPartnerId,@MainReferCode)
+
+	
+	DECLARE @ClassCount INT=0
+	SELECT @ClassCount=COUNT(*)
+	FROM ##TempNew T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Classes] C ON T.ReferCode=C.ReferCode
+	INNER JOIN [onthef1x_Classbook].[dbo].[Order] O ON O.EntityId=C.Id AND O.ModuleId=3
+	WHERE YEAR(o.PaidDate)=@Year AND MONTH(O.PaidDate)=@Month
+
+
+	DECLARE @StudentCount INT=0
+	SELECT @StudentCount=COUNT(*)
+	FROM ##TempNew T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Student] C ON T.ReferCode=C.ReferCode
+
+	DECLARE @TeacherCount INT=0
+	SELECT @TeacherCount=COUNT(*)
+	FROM ##TempNew T
+	INNER JOIN [onthef1x_Classbook].[dbo].[Teacher] C ON T.ReferCode=C.ReferCode
+
+	DECLARE @CareerExpertCount INT=0
+	SELECT @CareerExpertCount=COUNT(*)
+	FROM ##TempNew T
+	INNER JOIN [onthef1x_Classbook].[dbo].[CareerExpert] C ON T.ReferCode=C.ReferCode
+
+	
 	UPDATE ##TempMain
 	SET Classes=@ClassCount,
 	Student=@StudentCount,
 	Teacher=@TeacherCount,
 	CareerExpert=@CareerExpertCount
 
+	SELECT * FROM [onthef1x_Classbook].[dbo].[Order]
+	WHERE Year(PaidDate) = @Year  AND MONTH(PaidDate) = @Month
+	
 	SELECT * FROM ##TempMain
 END
