@@ -6,6 +6,7 @@ using ChannelPartnerApplication.Service;
 using ChannelPartnerApplication.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using RestSharp;
 using System.Collections.Generic;
@@ -119,6 +120,78 @@ namespace ChannelPartnerApplication.Controllers.API
         public IEnumerable<object> GetLevelChartInformations()
         {
             return _channelPartnerService.GetLevelChart();
+        }
+
+        #endregion
+
+        #region Static  HTML Page
+
+        // GET api/Common/GetAboutUsPage
+        [HttpGet("GetAboutUsPage")]
+        public string GetAboutUsPage()
+        {
+            return ChannelPartnerConstant.ClassbookWebSite_HostURL + "HtmlPage/AboutUs.html";
+        }
+
+        // GET api/Common/GetNeedHelpPage
+        [HttpGet("GetNeedHelpPage")]
+        public string GetNeedHelpPage()
+        {
+            return ChannelPartnerConstant.ClassbookWebSite_HostURL + "HtmlPage/NeedHelp.html";
+        }
+
+        // GET api/Common/GetTermsAndConditionsPage
+        [HttpGet("GetTermsAndConditionsPage")]
+        public string GetTermsAndConditionsPage()
+        {
+            return ChannelPartnerConstant.ClassbookWebSite_HostURL + "HtmlPage/TermsAndConditions.html";
+        }
+
+        // GET api/Common/GetContactUsPage
+        [HttpGet("GetContactUsPage")]
+        public object GetContactUsPage()
+        {
+            var queryType = from q in _context.QueryType
+                            where q.Active == true
+                            select new SelectListItem
+                            {
+                                Text = q.Type.ToString(),
+                                Value = q.Id.ToString()
+                            };
+
+            return new ContactUsModel()
+            {
+                EmailId = "otgsServices@gmail.com",
+                PhoneNo = "1234567890",
+                Address = "Pune, Maharastara",
+                Website = "www.otgs.com",
+                Message = "",
+                QueryType = queryType.ToList()
+            };
+        }
+
+        // GET api/Common/PostContactUsPage
+        [HttpPost("PostContactUsPage")]
+        public object PostContactUsPage([FromForm] ContactUsModel model)
+        {
+            string authorizeTokenKey = _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"];
+            var singleUser = _context.Users.Where(x => x.AuthorizeTokenKey == authorizeTokenKey).AsNoTracking();
+            if (singleUser.Any())
+            {
+                _channelPartnerService.SaveQueries(model, singleUser.FirstOrDefault().Id);
+                return Ok();
+            }
+            return Ok();
+        }
+
+        // GET api/Common/GetFAQs
+        [HttpPost("GetFAQs")]
+        public object GetFAQs()
+        {
+            var faq = from q in _context.FAQ
+                      where q.Active == true
+                      select q;
+            return faq.ToList();
         }
 
         #endregion

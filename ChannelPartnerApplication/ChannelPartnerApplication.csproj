@@ -39,6 +39,9 @@
     <Content Update="wwwroot\Content\HtmlTemplates\ForgotPassword.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\HtmlPage\AboutUs.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

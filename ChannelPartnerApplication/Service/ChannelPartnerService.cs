@@ -665,6 +665,18 @@ namespace ChannelPartnerApplication.Service
             }
         }
 
+        public void SaveQueries(ContactUsModel model, int cpId)
+        {
+            Queries q = new Queries();
+            q.Message = model.Message;
+            q.TypeId = model.QueryTypeId;
+            q.CpId = cpId;
+            q.Active = true;
+            _channelPartnerManagementContext.Queries.Add(q);
+            _channelPartnerManagementContext.SaveChanges();
+        }
+
         #endregion
+
     }
 }

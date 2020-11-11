@@ -31,6 +31,9 @@ namespace ChannelPartnerApplication.DataContext
         public DbSet<Settings> Settings { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Logs> Logs { get; set; }
+        public DbSet<QueryType> QueryType { get; set; }
+        public DbSet<Queries> Queries { get; set; }
+        public DbSet<FAQ> FAQ { get; set; }
 
         #endregion
 
