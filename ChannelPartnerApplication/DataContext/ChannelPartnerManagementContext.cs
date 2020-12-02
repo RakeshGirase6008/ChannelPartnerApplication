@@ -17,6 +17,8 @@ namespace ChannelPartnerApplication.DataContext
         public DbSet<States> States { get; set; }
         public DbSet<City> City { get; set; }
         public DbSet<Pincode> Pincode { get; set; }
+        public DbSet<Years> Years { get; set; }
+        public DbSet<Months> Months { get; set; }
         public DbSet<ChannelPartner> ChannelPartner { get; set; }
         public DbSet<ChannelPartnerMapping> ChannelPartnerMapping { get; set; }
         public DbSet<PromotionalCycle> PromotionalCycle { get; set; }

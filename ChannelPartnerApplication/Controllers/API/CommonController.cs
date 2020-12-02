@@ -89,6 +89,70 @@ namespace ChannelPartnerApplication.Controllers.API
             return cityData;
         }
 
+        // GET api/Common/GetYears
+        [HttpGet("GetYears")]
+        public IEnumerable<object> GetYears()
+        {
+            var years = _context.Years.Where(x => x.Active == true).Select(x => new { x.YearName, x.Id });
+            return years;
+        }
+
+        // GET api/Common/GetMonths
+        [HttpGet("GetMonths")]
+        public IEnumerable<object> GetMonths()
+        {
+            var years = _context.Months.Where(x => x.Active == true).Select(x => new { x.MonthName, x.Id });
+            return years;
+        }
+
+        // GET api/Common/GetBoards
+        [HttpGet("GetBoards")]
+        public object GetBoards()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetBoard");
+            return response.Content;
+        }
+
+        // GET api/Common/GetMediums
+        [HttpGet("GetMediums")]
+        public object GetMediums()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetMedium");
+            return response.Content;
+        }
+
+        // GET api/Common/GetStandard
+        [HttpGet("GetStandard")]
+        public object GetStandard()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetStandard");
+            return response.Content;
+        }
+
+        // GET api/Common/GetSubjectSpeciality
+        [HttpGet("GetSubjectSpeciality")]
+        public object GetSubjectSpeciality()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetSubjectSpeciality");
+            return response.Content;
+        }
+
+        // GET api/Common/GetCourseCategory
+        [HttpGet("GetCourseCategory")]
+        public object GetCourseCategory()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetCourseCategory");
+            return response.Content;
+        }
+
+        // GET api/Common/GetCourses
+        [HttpGet("GetCourses")]
+        public object GetCourses()
+        {
+            IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Common/GetCourses");
+            return response.Content;
+        }
+
         // GET api/Common/GetGenerations
         [HttpGet("GetGenerations")]
         public IEnumerable<object> GetGenerations()
@@ -316,6 +380,7 @@ namespace ChannelPartnerApplication.Controllers.API
             IRestResponse response = _channelPartnerService.GetCommonFromClassBook("/api/v1/Teacher/EditProfileForTeacher/" + id.ToString() + "");
             return response.Content;
         }
+
         #endregion
     }
 }
