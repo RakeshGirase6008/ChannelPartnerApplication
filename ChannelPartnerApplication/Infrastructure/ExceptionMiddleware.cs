@@ -14,55 +14,71 @@ namespace ChannelPartnerApplication.Infrastructure
 {
     public class ExceptionMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly LogsService _logsService;
-        private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
 
-        public ExceptionMiddleware(RequestDelegate next, LogsService logsService,
-            ChannelPartnerManagementContext channelPartnerManagementContext)
+        #region Fields
+
+        private readonly RequestDelegate _next;
+
+        #endregion
+
+        #region Ctor
+
+        public ExceptionMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logsService = logsService;
-            _channelPartnerManagementContext = channelPartnerManagementContext;
         }
-        public async Task InvokeAsync(HttpContext httpContext)
+
+        #endregion
+
+        #region Method
+        public async Task Invoke(HttpContext context, LogsService logsService, ChannelPartnerManagementContext channelPartnerManagementContext)
         {
             try
             {
-                await _next(httpContext);
+                await _next.Invoke(context);
             }
             catch (Exception ex)
             {
-                var endpoint = httpContext.GetEndpoint();
-                int userId = 0;
-                string controllerName = string.Empty;
-                if (endpoint != null)
-                {
-                    StringValues secretKeyToken;
-                    httpContext.Request.Headers.TryGetValue("AuthorizeTokenKey", out secretKeyToken).ToString();
-                    var authorizationTokenKey = secretKeyToken.ToString();
-                    var singleUser = _channelPartnerManagementContext.Users.Where(x => x.AuthorizeTokenKey == authorizationTokenKey).AsNoTracking();
-                    if (singleUser.Any())
-                    {
-                        userId = singleUser.FirstOrDefault().Id;
-                    }
-                    var controllerActionDescriptor = endpoint.Metadata.GetMetadata<ControllerActionDescriptor>();
-                    if (controllerActionDescriptor != null)
-                        controllerName = controllerActionDescriptor.ControllerName;
-                }
-                _logsService.InsertLogs(controllerName, ex, httpContext.Request.Path.Value, userId);
-                await HandleExceptionAsync(httpContext, ex);
+                await HandleExceptionAsync(context, ex, logsService, channelPartnerManagementContext);
             }
         }
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext httpContext, Exception exception, LogsService _logsService, ChannelPartnerManagementContext _channelPartnerManagementContext)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            return context.Response.WriteAsync(new ErrorDetails()
+            #region Add Logs
+
+            var endpoint = httpContext.GetEndpoint();
+            int userId = 0;
+            string controllerName = string.Empty;
+            if (endpoint != null)
             {
-                StatusCode = context.Response.StatusCode,
+                StringValues secretKeyToken;
+                httpContext.Request.Headers.TryGetValue("AuthorizeTokenKey", out secretKeyToken).ToString();
+                var authorizationTokenKey = secretKeyToken.ToString();
+                var singleUser = _channelPartnerManagementContext.Users.Where(x => x.AuthorizeTokenKey == authorizationTokenKey).AsNoTracking();
+                if (singleUser.Any())
+                {
+                    userId = singleUser.FirstOrDefault().Id;
+                }
+                var controllerActionDescriptor = endpoint.Metadata.GetMetadata<ControllerActionDescriptor>();
+                if (controllerActionDescriptor != null)
+                    controllerName = controllerActionDescriptor.ControllerName;
+            }
+            _logsService.InsertLogs(controllerName, exception, httpContext.Request.Path.Value, userId);
+
+            #endregion
+
+            #region Exception Response
+
+            httpContext.Response.ContentType = "application/json";
+            httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            return httpContext.Response.WriteAsync(new ErrorDetails()
+            {
+                StatusCode = httpContext.Response.StatusCode,
                 Message = exception?.Message
             }.ToString());
+
+            #endregion
         }
+        #endregion
     }
 }
