@@ -237,7 +237,7 @@ namespace ChannelPartnerApplication.Service
             string words = "";
             if (number > 0)
             {
-                var unitsMap = new[] { "zero", "First", "Second", "Third", "Fourth", "Fifth", "Sixth" };
+                var unitsMap = new[] { "zero", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eight", "Ninth" };
                 words = unitsMap[number];
             }
             return words + " Generations";

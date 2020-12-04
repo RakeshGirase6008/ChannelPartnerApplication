@@ -12,7 +12,7 @@ namespace ChannelPartnerApplication.DataContext
         }
 
 
-        #region ClassBookMain
+        #region Channel Partner
 
         public DbSet<States> States { get; set; }
         public DbSet<City> City { get; set; }
