@@ -2,7 +2,7 @@
 {
     public class Months : BaseEntity
     {
-        public int MonthName { get; set; }
+        public string MonthName { get; set; }
         public bool Active { get; set; }
     }
 }
