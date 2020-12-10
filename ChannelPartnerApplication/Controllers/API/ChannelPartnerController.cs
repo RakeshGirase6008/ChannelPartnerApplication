@@ -5,10 +5,10 @@ using ChannelPartnerApplication.Models.RequestModels;
 using ChannelPartnerApplication.Models.ResponseModel;
 using ChannelPartnerApplication.Service;
 using ChannelPartnerApplication.Utility;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using RestSharp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -56,9 +56,11 @@ namespace ChannelPartnerApplication.Controllers.API
                     var singleUser = _channelPartnerManagementContext.Users.Where(x => x.Email == ChannelPartnerData.Email).AsNoTracking();
                     if (!singleUser.Any())
                     {
-                        (int channelPartnerId, string uniqueNo) = _channelPartnerService.SaveChannelPartner(ChannelPartnerData, model.Files);
+                        List<IFormFile> files = new List<IFormFile>();
+                        files.Add(model.File);
+                        (int channelPartnerId, string uniqueNo) = _channelPartnerService.SaveChannelPartner(ChannelPartnerData, files);
                         string UserName = ChannelPartnerData.FirstName + uniqueNo;
-                        var user = _channelPartnerService.SaveUserData(channelPartnerId, Module.ChannelPartner, UserName, ChannelPartnerData.Email, model.FCMId);
+                        var user = _channelPartnerService.SaveUserData(channelPartnerId, Module.ChannelPartner, UserName, ChannelPartnerData.Email);
                         await Task.Run(() => _channelPartnerService.SendVerificationLinkEmail(ChannelPartnerData.Email, user.Password, Module.ChannelPartner.ToString()));
                         responseModel.Message = ChannelPartnerConstantString.Register_ChannelPartner_Success.ToString();
                         responseModel.Data = _channelPartnerModelFactory.PrepareUserDetail(user);
@@ -96,8 +98,10 @@ namespace ChannelPartnerApplication.Controllers.API
                     }
                     else
                     {
+                        List<IFormFile> files = new List<IFormFile>();
+                        files.Add(model.File);
                         var singleChannelPartner = _channelPartnerManagementContext.ChannelPartner.Where(x => x.Id == ChannelPartnerData.Id).AsNoTracking().FirstOrDefault();
-                        int channelPartnerId = _channelPartnerService.UpdateChannelPartner(ChannelPartnerData, singleChannelPartner, model.Files);
+                        int channelPartnerId = _channelPartnerService.UpdateChannelPartner(ChannelPartnerData, singleChannelPartner, files);
                         responseModel.Message = ChannelPartnerConstantString.Edit_ChannelPartner_Success.ToString();
                         return StatusCode((int)HttpStatusCode.OK, responseModel);
                     }
@@ -146,7 +150,6 @@ namespace ChannelPartnerApplication.Controllers.API
                             DOB = channelPartner.DOB.ToString(),
                             ContactNo = channelPartner.ContactNo,
                             AlternateContact = channelPartner.AlternateContact,
-                            TeachingExperience = channelPartner.TeachingExperience,
                             Description = channelPartner.Description,
                             ReferCode = channelPartner.ReferCode,
                             StateName = state.Name,

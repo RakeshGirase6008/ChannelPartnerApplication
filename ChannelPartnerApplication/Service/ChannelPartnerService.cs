@@ -246,7 +246,7 @@ namespace ChannelPartnerApplication.Service
         ///// <summary>
         ///// SaveUserData
         ///// </summary>
-        public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId)
+        public Users SaveUserData(int userId, Module module, string userName, string email, string FCMId = "")
         {
             var password = GeneratePassword(true, true, true, false, false, 16);
             Users user = new Users();
@@ -264,7 +264,6 @@ namespace ChannelPartnerApplication.Service
             _channelPartnerManagementContext.SaveChanges();
             return user;
         }
-
 
         #endregion
 
@@ -291,7 +290,6 @@ namespace ChannelPartnerApplication.Service
             ChannelPartner.Pincode = ChannelPartnerData.Pincode;
             ChannelPartner.ApproveStatus = ChannelPartnerData.ApproveStatus;
             ChannelPartner.ApprovalDate = ChannelPartnerData.ApprovalDate;
-            ChannelPartner.TeachingExperience = ChannelPartnerData.TeachingExperience;
             ChannelPartner.Description = ChannelPartnerData.Description;
             ChannelPartner.ReferCode = GenerateReferecode();
             var previousUnique = _channelPartnerManagementContext.ChannelPartner.OrderByDescending(x => x.Id).Select(x => x.UniqueNo).FirstOrDefault();
@@ -358,7 +356,6 @@ namespace ChannelPartnerApplication.Service
             ChannelPartner.Pincode = ChannelPartnerData.Pincode;
             ChannelPartner.ApproveStatus = ChannelPartnerData.ApproveStatus;
             ChannelPartner.ApprovalDate = ChannelPartnerData.ApprovalDate;
-            ChannelPartner.TeachingExperience = ChannelPartnerData.TeachingExperience;
             ChannelPartner.Description = ChannelPartnerData.Description;
             ChannelPartner.ReferCode = ChannelPartnerData.ReferCode;
             ChannelPartner.UpdatedDate = DateTime.Now;
@@ -387,8 +384,10 @@ namespace ChannelPartnerApplication.Service
             request.AddHeader("AuthorizeTokenKey", "Default");
             //request.AddFile("file", model.File.FileName, model.File.ContentType);
             request.AddParameter("data", model.Data);
-            request.AddParameter("DeviceId", model.DeviceId);
-            request.AddParameter("FCMId", model.FCMId);
+            request.AddParameter("DeviceId", "123456");
+            request.AddParameter("FCMId", "dummyFCMID");
+            //request.AddParameter("DeviceId", model.DeviceId);
+            //request.AddParameter("FCMId", model.FCMId);
             IRestResponse response = client.Execute(request);
             return response;
         }

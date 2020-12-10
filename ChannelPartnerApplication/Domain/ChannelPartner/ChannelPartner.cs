@@ -18,7 +18,6 @@ namespace ChannelPartnerApplication.Domain.ChannelPartner
         public int Pincode { get; set; }
         public bool ApproveStatus { get; set; }
         public DateTime? ApprovalDate { get; set; }
-        public string TeachingExperience { get; set; }
         public string Description { get; set; }
         public string ReferCode { get; set; }
         public string UniqueNo { get; set; }
