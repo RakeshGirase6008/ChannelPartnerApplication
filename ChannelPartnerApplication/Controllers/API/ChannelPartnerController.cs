@@ -24,6 +24,7 @@ namespace ChannelPartnerApplication.Controllers.API
         private readonly ChannelPartnerManagementContext _channelPartnerManagementContext;
         private readonly ChannelPartnerModelFactory _channelPartnerModelFactory;
         private readonly ChannelPartnerService _channelPartnerService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
 
         #endregion
@@ -32,11 +33,13 @@ namespace ChannelPartnerApplication.Controllers.API
 
         public ChannelPartnerController(ChannelPartnerManagementContext channelPartnerManagementContext,
             ChannelPartnerModelFactory channelPartnerModelFactory,
-            ChannelPartnerService channelPartnerService)
+            ChannelPartnerService channelPartnerService,
+            IHttpContextAccessor httpContextAccessor)
         {
             this._channelPartnerManagementContext = channelPartnerManagementContext;
             this._channelPartnerModelFactory = channelPartnerModelFactory;
             this._channelPartnerService = channelPartnerService;
+            this._httpContextAccessor = httpContextAccessor;
         }
 
         #endregion
@@ -123,7 +126,17 @@ namespace ChannelPartnerApplication.Controllers.API
         [HttpPost("GetChannelPartnersList")]
         public IEnumerable<ChannelPartnerListingModel> GetChannelPartnersList([FromForm] ListingSearchModel model)
         {
-            return _channelPartnerService.GetChannelPartnerListing(1, model.searchKeyword, model.levelId, model.generationId);
+            IList<ChannelPartnerListingModel> model1 = new List<ChannelPartnerListingModel>();
+            string authorizeTokenKey = _httpContextAccessor.HttpContext.Request.Headers["AuthorizeTokenKey"];
+            var singleUser = _channelPartnerManagementContext.Users.Where(x => x.AuthorizeTokenKey == authorizeTokenKey).AsNoTracking();
+            if (singleUser.Any())
+            {
+                return _channelPartnerService.GetChannelPartnerListing(singleUser.FirstOrDefault().EntityId, model.searchKeyword, model.levelId, model.generationId);
+            }
+            else
+            {
+                return model1;
+            }
         }
 
         //// GET api/ChannelPartner/GetChannelPartnerById/5
@@ -185,7 +198,7 @@ namespace ChannelPartnerApplication.Controllers.API
             return _channelPartnerService.MyStatusInformation(id);
         }
 
-        
+
         #endregion
     }
 }
