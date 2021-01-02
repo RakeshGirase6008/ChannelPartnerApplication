@@ -53,6 +53,7 @@ namespace ChannelPartnerApplication.Controllers.API
         [HttpPost("SchoolRegister")]
         public ActionResult SchoolRegister([FromForm] CommonRegistrationModel model)
         {
+
             IRestResponse response = _channelPartnerService.RegisterMethod(model, "/api/v1/school/register");
             return StatusCode((int)response.StatusCode, response.Content);
         }
