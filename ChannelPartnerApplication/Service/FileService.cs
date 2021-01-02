@@ -11,21 +11,23 @@ namespace ChannelPartnerApplication.Service
     {
         public string SaveFile(List<IFormFile> files, string subDirectory)
         {
-            subDirectory = subDirectory ?? string.Empty;
+            subDirectory ??= string.Empty;
             var target = Path.Combine(Directory.GetCurrentDirectory() + "\\wwwroot\\", subDirectory);
             Directory.CreateDirectory(target);
             string filePath = string.Empty;
             string retunFilePath = string.Empty;
-            files.ForEach(async file =>
-            {
-                if (file.Length <= 0) return;
-                filePath = Path.Combine(target, file.FileName);
-                retunFilePath = Path.Combine(subDirectory, file.FileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+            if (files != null && files.Count() > 0)
+                files.ForEach(async file =>
                 {
-                    await file.CopyToAsync(stream);
-                }
-            });
+                    if (file == null || file.Length <= 0) return;
+                    filePath = Path.Combine(target, file.FileName);
+                    retunFilePath = Path.Combine(subDirectory, file.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                });
+            
             return retunFilePath;
         }
 
